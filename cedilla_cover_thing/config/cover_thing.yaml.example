@@ -1,0 +1,10 @@
+max_attempts: 1
+
+target: 'http://covers.librarything.com/devkey/[KEY]/large/isbn/'
+
+query_string: ''    
+
+http_method: 'get'
+http_timeout: 5
+http_error_on_non_200: true
+http_max_redirects: 5

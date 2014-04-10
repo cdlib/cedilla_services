@@ -1,0 +1,12 @@
+source 'https://rubygems.org'
+gem 'rake'
+gem 'rack'
+gem 'thin'
+gem 'sinatra'
+gem 'sinatra-contrib'
+
+gem "cedilla", :path => "~/Documents/workspace/cedilla" 
+
+group :test do
+  gem 'webmock', "~> 1.17.4"
+end
