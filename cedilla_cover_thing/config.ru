@@ -27,6 +27,6 @@ if defined?(PhusionPassenger)
   require './passenger_hack.rb'
 end
 
-require('./service.rb')
+require('./cover_thing.rb')
 
-run AggregatorServiceTest.new('./config/service_test.yaml')
+run AggregatorServiceTest.new

@@ -6,7 +6,11 @@ class AggregatorServiceTest < Sinatra::Application
     200
     "You have reached the service_test!"
   end
-   
+  
+  get '/service_test' do
+    "Hello World"
+  end
+  
   # -------------------------------------------------------------------------
   post '/service_test' do
     200
@@ -39,7 +43,7 @@ class CoverThingService < CedillaService
   # -------------------------------------------------------------------------
   def initialize
     begin
-      config = YAML.load_file('./config/service_test.yaml')
+      config = YAML.load_file('./config/cover_thing.yaml')
     
       super(config)
       
