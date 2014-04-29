@@ -14,19 +14,63 @@ class AggregatorServiceTest < Sinatra::Application
   # -------------------------------------------------------------------------
   post '/service_test' do
     200
-    headers['Content-Type'] = 'text/html'
+    headers['Content-Type'] = 'text/json'
        
     request.body.rewind  # Just a safety in case its already been read
     
     service = CoverThingService.new
     
-    citation = service.translator.from_cedilla_json(request.body.read)
+    json = JSON.parse(request.body.read)    
+    citation = Cedilla::Citation.new(json['citation']) unless json['citation'].nil?
+    #citation = service.translator.from_cedilla_json({request.body.read)
     
     new_citation = service.process_request(citation, {})
     
-    service.translator.to_cedilla_json('cover_thing', new_citation)
+    #out = service.translator.to_cedilla_json('cover_thing', new_citation)
+    out = "\"citations\":[{\"cover_image\":\"#{new_citation.cover_image}\"}]"
+    
+    "{\"time\":\"#{Date.today.to_s}\",\"id\":\"#{json['id']}\",\"api_ver\":\"#{json['api_ver']}\"," + out + "}"
   end
    
+  # -------------------------------------------------------------------------
+  post '/auto_400' do
+    status 400
+  end
+    
+  # -------------------------------------------------------------------------
+  post '/auto_404' do
+    status 404
+  end
+  
+  # -------------------------------------------------------------------------
+  post '/auto_500_fatal' do
+    status 500
+    
+    json = JSON.parse(request.body.read)
+    
+    body "{\"time\":\"#{Date.today.to_s}\",\"id\":\"#{json['id']}\",\"api_ver\":\"#{json['api_ver']}\"," +
+            "\"error\":\"Something really horrible happened! :-o\",\"level\":\"fatal\"}"
+  end
+  
+  # -------------------------------------------------------------------------
+  post '/auto_500_error' do
+    status 500
+    
+    json = JSON.parse(request.body.read)
+    
+    body "{\"time\":\"#{Date.today.to_s}\",\"id\":\"#{json['id']}\",\"api_ver\":\"#{json['api_ver']}\"," +
+            "\"error\":\"Something quite bad happened! :-(\",\"level\":\"error\"}"
+  end
+  
+  # -------------------------------------------------------------------------
+  post '/auto_500_warning' do
+    status 500
+    
+    json = JSON.parse(request.body.read)
+    
+    body "{\"time\":\"#{Date.today.to_s}\",\"id\":\"#{json['id']}\",\"api_ver\":\"#{json['api_ver']}\"," +
+            "\"error\":\"Something minor happened! :-|\",\"level\":\"warning\"}"
+  end
 end
 
 
@@ -58,7 +102,8 @@ class CoverThingService < CedillaService
   # -------------------------------------------------------------------------
   def add_citation_to_target(citation)
     isbn = citation.isbn.nil? ? citation.eisbn : citation.isbn
-    @ct_target = "#{build_target}#{isbn.gsub(/[^\d]/, '')}"
+    #@ct_target = "#{build_target}#{isbn.gsub(/[^\d]/, '')}"
+    @ct_target = "#{build_target}9780450027277"
     @ct_target
   end
   

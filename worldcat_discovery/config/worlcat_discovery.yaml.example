@@ -1,0 +1,12 @@
+max_attempts: 1
+
+target: 'https://beta.worldcat.org/discovery/bib/search'
+
+query_string: 
+  - key: 'your key'
+  - secret: 'your secret'
+
+http_method: 'get'
+http_timeout: 5
+http_error_on_non_200: true
+http_max_redirects: 5
