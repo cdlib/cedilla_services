@@ -4,11 +4,16 @@ require 'sinatra'
 require 'yaml'
 require('./oclc_xid.rb')
 
-#Bundler.require(:default, ENV['RACK_ENV'].to_sym)
-
-set :environment, :development #ENV['RACK_ENV'].to_sym
-set :run, true
-set :raise_errors, true
+configure do
+  LOGGER = Logger.new("oclc_xid.log")
+  enable :logging, :dump_errors
+  set :raise_errors, true
+  
+  set :environment, :development #ENV['RACK_ENV'].to_sym
+  set :run, true
+  set :raise_errors, true
+  
+end
 
 # -------------------------------------------------------------------------
 run OclcXid.new
