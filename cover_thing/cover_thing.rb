@@ -4,8 +4,9 @@ require './services/cover_thing_service.rb'
 
 class CoverThing < Sinatra::Application
   
-  default = "The Cover Thing service is expecting an HTTP POST with a JSON message similar to the examples found: " +
-            "https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services"
+  default = "The Cover Thing service is expecting an HTTP POST with a JSON message similar to the examples found on: " +
+            "<a href='https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services'>" +
+            "Cedilla Delivery Aggregator Wiki</a>"
   
   # -------------------------------------------------------------------------
   get '/cover_thing' do

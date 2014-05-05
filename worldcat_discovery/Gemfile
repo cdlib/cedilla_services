@@ -9,7 +9,7 @@ gem 'json-ld'
 gem 'equivalent-xml'
 gem 'oclc-auth'
 
-gem "cedilla", :path => "~/Documents/workspace/cedilla_ruby" 
+gem "cedilla"
 
 group :test do
   gem 'webmock', "~> 1.17.4"

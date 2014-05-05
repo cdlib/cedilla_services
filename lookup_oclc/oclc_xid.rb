@@ -5,8 +5,9 @@ require('./services/xid_service.rb')
 
 class OclcXid < Sinatra::Application
 
-  default = "The OCLC Xid service is expecting an HTTP POST with a JSON message similar to the examples found: " +
-            "https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services"
+  default = "The Cover Thing service is expecting an HTTP POST with a JSON message similar to the examples found on: " +
+            "<a href='https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services'>" +
+            "Cedilla Delivery Aggregator Wiki</a>"
   
   # -------------------------------------------------------------------------
   get '/xid' do
