@@ -2,7 +2,7 @@ require 'cedilla'
 require 'cedilla/error'
 require './services/cover_thing_service.rb'
 
-class AggregatorServiceTest < Sinatra::Application
+class CoverThing < Sinatra::Application
   
   default = "The Cover Thing service is expecting an HTTP POST with a JSON message similar to the examples found: " +
             "https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services"

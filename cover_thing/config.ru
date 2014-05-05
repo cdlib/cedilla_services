@@ -29,4 +29,4 @@ end
 
 require('./cover_thing.rb')
 
-run AggregatorServiceTest.new
+run CoverThing.new
