@@ -1,4 +1,9 @@
-class WorldcatDiscoveryService < CedillaService
+# -------------------------------------------------------------------------
+# An Implementation of the CedillaService Gem
+#
+# Would likely sit in another file within the project
+# -------------------------------------------------------------------------
+class CoverThingService < CedillaService
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -6,11 +11,9 @@ class WorldcatDiscoveryService < CedillaService
   # -------------------------------------------------------------------------
   def initialize
     begin
-      @config = YAML.load_file('./config/worldcat_discovery.yaml')
+      config = YAML.load_file('./config/cover_thing.yaml')
     
-      super(@config)
-      
-      @api_key = OCLC::Auth::WSKey.new(@config['query_string']['key'], @config['query_string']['secret'])
+      super(config)
       
     rescue Exception => e
       $stdout.puts "Unable to load configuration file!"
@@ -22,32 +25,21 @@ class WorldcatDiscoveryService < CedillaService
   # All CoverThing cares about is the ISBN, so overriding the base class
   # -------------------------------------------------------------------------
   def add_citation_to_target(citation)
-    ret = "#{build_target}"
-    
-    title = citation.title unless citation.title.nil?
-    title = citation.book_title unless citation.book_title.nil?
-    title = citation.journal_title unless citation.journal_title.nil?
-    title = citation.article_title unless citation.article_title.nil?
-    
-    if citation.oclc.nil?
-      ret += "#{@config['target_search']}/search?q=#{CGI.escape(title)}"
-    else
-      ret += "#{@config['target_id']}/data/#{CGI.escape(citation.oclc)}"
-    end
-
-    ret
+    isbn = citation.isbn.nil? ? citation.eisbn : citation.isbn
+    @ct_target = "#{build_target}#{isbn.gsub(/[^\d]/, '')}"
+    @ct_target
   end
   
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
   def process_response(status, headers, body)
-  
-    puts "got a - #{status}"
-    
-    puts "#{headers}"
-    
-    puts "#{body}"
+    # If a content length of 43 was returned then we got the default Not-Found page!
+    if headers['content_length'] == '43'
+      return Cedilla::Citation.new({}) 
+    else
+      return Cedilla::Citation.new({:cover_image => @ct_target}) 
+    end
   end
   
 end

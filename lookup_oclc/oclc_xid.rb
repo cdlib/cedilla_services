@@ -1,35 +1,37 @@
 require 'cedilla'
 require 'cedilla/error'
-require './services/cover_thing_service.rb'
 
-class AggregatorServiceTest < Sinatra::Application
-  
-  default = "The Cover Thing service is expecting an HTTP POST with a JSON message similar to the examples found: " +
+require('./services/xid_service.rb')
+
+class OclcXid < Sinatra::Application
+
+  default = "The OCLC Xid service is expecting an HTTP POST with a JSON message similar to the examples found: " +
             "https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services"
   
   # -------------------------------------------------------------------------
-  get '/cover_thing' do
+  get '/xid' do
     default
   end
   
   # -------------------------------------------------------------------------
-  post '/cover_thing' do
+  post '/xid' do
     headers['Content-Type'] = 'text/json'
     payload = ""
-    service = CoverThingService.new
+    service = XidService.new
     
     request.body.rewind  # Just a safety in case its already been read
-    
+  
     begin  
       data = request.body.read
       
+      # Capture the ID passed in by the caller because we need to send it back to them
       id = JSON.parse(data)['id']
       
       citation = Cedilla::Translator.from_cedilla_json(data)
       
       begin
-        if citation.isbn.nil? and citation.eisbn.nil?
-          # No ISBN was passed, which this service requires so just send back a 404 Not Found
+        if citation.isbn.nil? and citation.eisbn.nil? and citation.issn.nil? and citation.eissn.nil?
+          # No ISBN or ISSN was passed, which this service requires so just send back a 404 Not Found
           status 404  
           payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
           
@@ -68,8 +70,5 @@ class AggregatorServiceTest < Sinatra::Application
     payload
     
   end
-   
+
 end
-
-
-

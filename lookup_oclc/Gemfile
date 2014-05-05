@@ -4,10 +4,6 @@ gem 'rack'
 gem 'thin'
 gem 'sinatra'
 gem 'sinatra-contrib'
-gem 'rdf-rdfxml'
-gem 'json-ld'
-gem 'equivalent-xml'
-gem 'oclc-auth'
 
 gem "cedilla", :path => "~/Documents/workspace/cedilla_ruby" 
 

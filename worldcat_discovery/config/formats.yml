@@ -1,0 +1,18 @@
+"library:Serial": "Serial"
+
+"schema:Book": "Book"
+"schema:Article": "Article"
+"schema:AudioObject": "Audio"
+"schema:CreativeWork": "Creative Work"
+
+"http://schema.org/Book": "Book"
+"http://schema.org/CreativeWork": "Creative Work"
+
+"http://purl.org/library/Serial": "Serial"
+
+"http://www.productontology.org/id/Video": "Video"
+"http://www.productontology.org/id/VHS": "Video"
+"http://www.productontology.org/id/DVD": "Video"
+"http://www.productontology.org/id/Video": "Video"
+"http://www.productontology.org/id/Audiobook": "Audio"
+"http://www.productontology.org/id/Compact_Disc": "Audio"

@@ -1,0 +1,11 @@
+max_attempts: 1
+
+target: 'http://{idType}.worldcat.org/webservices/xid/'
+
+query_string: 'method=getMetadata&format=json&fl=*'
+
+http_method: 'get'
+http_timeout: 5
+http_error_on_non_200: true
+http_max_redirects: 5
+

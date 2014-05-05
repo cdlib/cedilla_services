@@ -1,46 +1,72 @@
-require 'rubygems'
-require 'bundler'
-require 'sinatra'
-require 'rdf/rdfxml'
-require 'json/ld'
-require 'equivalent-xml'
-require 'oclc/auth'
-require 'cedilla'
+require('./services/discovery_service.rb')
 
-Bundler.require(:default, ENV['RACK_ENV'].to_sym)
-
-set :environment, ENV['RACK_ENV'].to_sym
-set :run, true
-set :raise_errors, true
-
-app_home = File.expand_path(File.dirname(__FILE__))
-LANGUAGES = YAML::load(File.read("#{app_home}/config/languages.yml"))
-FORMATS = YAML::load(File.read("#{app_home}/config/formats.yml"))
-
-
-# -------------------------------------------------------------------------
-require('./lib/discovery_service.rb')
-
-run WorldcatDiscoveryService.new
-
-# -------------------------------------------------------------------------
-post '/worldcat_discovery' do
-  200
-  headers['Content-Type'] = 'text/json'
+class WorldcatDiscovery < Sinatra::Application
+  
+  post '/worldcat_discovery' do
+    200
+    headers['Content-Type'] = 'text/json'
      
-  request.body.rewind  # Just a safety in case its already been read
+    request.body.rewind  # Just a safety in case its already been read
   
-  service = WorldcatDiscoveryService.new
+    service = WorldcatDiscoveryService.new
   
-  json = JSON.parse(request.body.read)    
-  citation = Cedilla::Citation.new(json['citation']) unless json['citation'].nil?
+    translator = Cedilla::Translator.new
   
-  new_citation = service.process_request(citation, {})
+    json = JSON.parse(request.body.read)    
+    citation = Cedilla::Citation.new(json['citation']) unless json['citation'].nil?
   
-  out = "\"citations\":[{\"cover_image\":\"#{new_citation.cover_image}\"}]"
+    begin
+      new_citations = service.process_request(citation, {})
+      
+      # Build the JSON will be handled by the gem eventually
+      out = "\"citations\":["
   
-  "{\"time\":\"#{Date.today.to_s}\",\"id\":\"#{json['id']}\",\"api_ver\":\"#{json['api_ver']}\"," + out + "}"
+      new_citations.each do |new_citation|
+        out += out[-1] == '}' ? ",{" : "{"
+      
+        new_citation.to_hash.each do |key, value|
+          out += "\"#{key}\":\"#{value}\","
+        end
+      
+        if new_citation.authors.size > 0
+          out += "\"authors\":["
+          new_citation.authors.each do |auth|
+            out += out[-1] == '}' ? ",{" : "{"
+        
+            auth.to_hash.each do |key, value|
+              out += "\"#{key}\":\"#{value}\","
+            end
+        
+            out = (out[-1] == ',') ? out[0..out.length - 2] + "}" : out + "}"
+          end
+          out += "],"
+        end
+        
+        if new_citation.resources.size > 0
+          out += "\"resources\":["
+          new_citation.resources.each do |rsc|
+            out += out[-1] == '}' ? ",{" : "{"
+        
+            rsc.to_hash.each do |key, value|
+              out += "\"#{key}\":\"#{value}\","
+            end
+        
+            out = (out[-1] == ',') ? out[0..out.length - 2] + "}" : out + "}"
+          end
+          out += "],"
+        end
+        
+        out = (out[-1] == ',') ? out[0..out.length - 2] + "}" : out + "}"
+      end
+    
+      out += "]"
+        
+    rescue Exception => e
+      puts e
+      puts e.backtrace
+    end
+    
+    "{\"time\":\"#{Date.today.to_s}\",\"id\":\"#{json['id']}\",\"api_ver\":\"#{json['api_ver']}\",#{out}}"
+  end
+
 end
-
-
-
