@@ -66,6 +66,8 @@ class CoverThing < Sinatra::Application
       status 400
     end
     
+    puts payload
+    
     payload
     
   end
