@@ -24,7 +24,8 @@ class SfxService < CedillaService
   # -------------------------------------------------------------------------
   def add_citation_to_target(citation)
     # Let the translator handle the construction of the URI IF this is an HTTP GET
-    hash = @request_translator.citation_to_hash(citation)
+    hash = citation.to_hash
+    target = "#{build_target}"
     
     # Get only the 'rft.' prefixed OpenUrl values
     params = hash.select{ |k,v| k.index('rft.') == 0 }
@@ -34,6 +35,8 @@ class SfxService < CedillaService
     
     target += '&' unless target[-1] == '&' or target[-1] == '?'
     target += citation.others.collect{ |i| parts = i.split('='); "#{URI.escape(parts[0])}=#{URI.escape(parts[1])}" }.join('&')
+    
+puts "calling: #{target}"
     
     target
   end
@@ -45,6 +48,8 @@ class SfxService < CedillaService
     doc = Nokogiri::XML(@response_body)
     
     citation = Cedilla::Citation.new
+    
+puts doc
     
     doc.xpath("//sfx_menu//targets//target").each do |target|
 

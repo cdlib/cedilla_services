@@ -66,7 +66,7 @@ class OclcXid < Sinatra::Application
         else
           LOGGER.error "Error for id: #{id} --> #{e.message}"
           LOGGER.error "#{e.backtrace}"
-          payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Error.new(Cedilla::Error.LEVELS[:error], "An error occurred while processing the request."))
+          payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Error.new(Cedilla::Error::LEVELS[:error], "An error occurred while processing the request."))
         end
       end
       

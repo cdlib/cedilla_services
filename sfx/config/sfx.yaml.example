@@ -1,0 +1,10 @@
+max_attempts: 1
+
+target: 'http://your.domain.org/sfx/address/'
+
+query_string: 'sid:=EBSCO:a9h&sfx.response_type=simplexml&sfx.show_availability=1&sfx.ignore_date_threshold=1'
+
+http_method: 'get'
+http_timeout: 5
+http_error_on_non_200: true
+http_max_redirects: 5
