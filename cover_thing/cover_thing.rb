@@ -26,11 +26,15 @@ class CoverThing < Sinatra::Application
       
       id = JSON.parse(data)['id']
       
+      LOGGER.info "Received request for id: #{id}"
+      LOGGER.debug data 
+      
       citation = Cedilla::Translator.from_cedilla_json(data)
       
       begin
         if citation.isbn.nil? and citation.eisbn.nil?
           # No ISBN was passed, which this service requires so just send back a 404 Not Found
+          LOGGER.info "Request did not contain enough info to contact enpoint for id: #{id}"
           status 404  
           payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
           
@@ -40,7 +44,10 @@ class CoverThing < Sinatra::Application
           if new_citation.is_a?(Cedilla::Citation)
             payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
             status 200
+            LOGGER.info "Response received from endpoint for id: #{id}"
+            
           else
+            LOGGER.info "Response from endpoint was empty for id: #{id}"
             status 404
             payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
           end
@@ -53,20 +60,23 @@ class CoverThing < Sinatra::Application
         if e.is_a?(Cedilla::Error)
           payload = Cedilla::Translator.to_cedilla_json(id, e)
         else
-          puts e.message
-          puts e.backtrace
+          LOGGER.error "Error for id: #{id} --> #{e.message}"
+          LOGGER.error "#{e.backtrace}"
           payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Error.new(Cedilla::Error.LEVELS[:error], "An error occurred while processing the request."))
         end
       end
       
     rescue Exception => e
       # JSON parse exception should throw an invalid request!
-      puts e.message
-      puts e.backtrace
+      request.body.rewind
+      
+      LOGGER.error "Error --> #{e.message}"
+      LOGGER.error "Request --> #{request.body.read}"
+      LOGGER.error "#{e.backtrace}"
       status 400
     end
     
-    puts payload
+    LOGGER.debug payload
     
     payload
     

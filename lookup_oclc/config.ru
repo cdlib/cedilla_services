@@ -11,8 +11,6 @@ configure do
   
   set :environment, :development #ENV['RACK_ENV'].to_sym
   set :run, true
-  set :raise_errors, true
-  
 end
 
 # -------------------------------------------------------------------------

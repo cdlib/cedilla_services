@@ -1,7 +1,9 @@
 require 'cedilla/author'
 require 'cedilla/resource'
 
-class WorldcatDiscoveryService < CedillaService
+require 'oclc/auth'
+
+class DiscoveryService < CedillaService
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -33,7 +35,9 @@ class WorldcatDiscoveryService < CedillaService
     title = citation.journal_title unless citation.journal_title.nil?
     title = citation.article_title unless citation.article_title.nil?
     
-    if citation.oclc.nil? and citation.isbn.nil? and citation.eisbn.nil? and citation.issn.nil? and citation.eissn.nil?
+    if citation.oclc.nil? and citation.isbn.nil? and citation.eisbn.nil? and citation.issn.nil? and
+                                                  citation.eissn.nil? and citation.lccn.nil?
+                                                  
       ret += "#{@target}/search?q=name:#{CGI.escape(title)}"
       ret += "&au:#{citation.authors.first.last_name}" unless citation.authors.first.nil?
       
@@ -43,17 +47,19 @@ class WorldcatDiscoveryService < CedillaService
       id = citation.isbn unless citation.isbn.nil?
       id = citation.eissn unless citation.eissn.nil?
       id = citation.issn unless citation.issn.nil?
+      id = citation.lccn unless citation.lccn.nil?
       
       ret += "#{@target}/data/#{CGI.escape(id)}"
     end
 
-    puts "calling: #{ret}"
+    LOGGER.info "calling: #{ret}"
 
     ret
   end
   
   # -------------------------------------------------------------------------
   def process_request(citation, headers)
+    # Add on the Worldcat WSKey and tell them we want JSON
     headers['authorization'] = @wskey.hmac_signature('GET', add_citation_to_target(citation))
     headers['accept'] = 'application/json'
     
@@ -77,7 +83,11 @@ class WorldcatDiscoveryService < CedillaService
     ret = []
     attributes = {}
     
-    json = JSON.parse(body)
+    LOGGER.debug "response status: #{status}"
+    LOGGER.debug "response headers: #{headers.collect{ |k,v| "#{k}=#{v}" }.join(', ')}"
+    LOGGER.debug "response body: #{body}"
+    
+    json = JSON.parse(body)  
   
     json['@graph'].each do |graph|
       graph['schema:significantLink'].each do |citation|

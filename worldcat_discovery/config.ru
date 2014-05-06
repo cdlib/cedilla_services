@@ -1,25 +1,18 @@
 require 'rubygems'
 require 'bundler'
 require 'sinatra'
-require 'rdf/rdfxml'
-require 'json/ld'
-require 'equivalent-xml'
-require 'oclc/auth'
-require 'cedilla'
 require 'yaml'
+require 'cedilla'
 require('./worldcat_discovery.rb')
 
-#Bundler.require(:default, ENV['RACK_ENV'].to_sym)
-
-set :environment, :development #ENV['RACK_ENV'].to_sym
-set :run, true
-set :raise_errors, true
-
-enable :sessions
-
-app_home = File.expand_path(File.dirname(__FILE__))
-LANGUAGES = YAML::load(File.read("#{app_home}/config/languages.yml"))
-FORMATS = YAML::load(File.read("#{app_home}/config/formats.yml"))
+configure do
+  LOGGER = Logger.new("worldcat_discovery.log")
+  enable :logging, :dump_errors
+  set :raise_errors, true
+  
+  set :environment, :development #ENV['RACK_ENV'].to_sym
+  set :run, true
+end
 
 # -------------------------------------------------------------------------
 run WorldcatDiscovery.new
