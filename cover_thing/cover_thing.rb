@@ -39,7 +39,7 @@ class CoverThing < Sinatra::Application
           
           if new_citation.is_a?(Cedilla::Citation)
             payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
-          
+            status 200
           else
             status 404
             payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))

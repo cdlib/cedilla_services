@@ -19,6 +19,8 @@
 Gemfile.lock
 
 *.sh
+*.log
+*.out
 
 .DS_Store
 

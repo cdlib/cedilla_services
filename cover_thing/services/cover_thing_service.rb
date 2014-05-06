@@ -38,7 +38,7 @@ class CoverThingService < CedillaService
     if headers['content_length'] == '43'
       return Cedilla::Citation.new({}) 
     else
-      return Cedilla::Citation.new({:cover_image => @ct_target}) 
+      return Cedilla::Citation.new({:sample_cover_image => @ct_target}) 
     end
   end
   

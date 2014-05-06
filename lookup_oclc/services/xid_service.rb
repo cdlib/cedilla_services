@@ -52,13 +52,22 @@ class XidService < CedillaService
             val = val.first if val.is_a?(Array)
           
             if key == 'lang'
-              attributes['text_language'] = val
+              attributes['language'] = val
           
             elsif key == 'city'
               attributes['publication_place'] = val
             
             elsif key == 'author'
               auths << Cedilla::Author.from_abritrary_string(val.sub('by ', ''))
+              
+            elsif key.include?('isbn')
+              attributes['isbn'] = val
+              
+            elsif key.include?('issn')
+              attributes['issn'] = val
+              
+            elsif key.include?('oclc')
+              attributes['oclc'] = val
               
             else
               attributes[key] = val unless key == 'url'

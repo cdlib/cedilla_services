@@ -45,7 +45,8 @@ class OclcXid < Sinatra::Application
           
           if new_citation.is_a?(Cedilla::Citation)
             payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
-          
+            status 200
+            
             LOGGER.info "Response received from endpoint for id: #{id}"
             
           else
