@@ -43,11 +43,11 @@ class DiscoveryService < CedillaService
       
     else
       id = citation.oclc unless citation.oclc.nil?
-      id = citation.eisbn unless citation.eisbn.nil?
-      id = citation.isbn unless citation.isbn.nil?
-      id = citation.eissn unless citation.eissn.nil?
-      id = citation.issn unless citation.issn.nil?
-      id = citation.lccn unless citation.lccn.nil?
+#      id = citation.eisbn unless citation.eisbn.nil?
+#      id = citation.isbn unless citation.isbn.nil?
+#      id = citation.eissn unless citation.eissn.nil?
+#      id = citation.issn unless citation.issn.nil?
+#      id = citation.lccn unless citation.lccn.nil?
       
       ret += "/data/#{CGI.escape(id)}"
     end
@@ -95,14 +95,23 @@ class DiscoveryService < CedillaService
     json = JSON.parse(body)  
   
     json['@graph'].each do |graph|
-      graph['schema:significantLink'].each do |citation|
+      if graph['schema:significantLink'].nil?
         
-        if citation.is_a?(Hash)
-          process_section(citation['schema:author']) unless citation['schema:author'].nil?
-        
-          ret['citations'] << process_section(citation['schema:about']) unless citation['schema:about'].nil?
+        unless graph['schema:about'].nil?
+          ret['citations'] << process_section(graph['schema:about'])
         end
-      end        
+        
+      else
+        # We got back multiple OCLC matches!
+        graph['schema:significantLink'].each do |citation|
+        
+          if citation.is_a?(Hash)
+            #process_section(citation['schema:author']) unless citation['schema:author'].nil?
+        
+            ret['citations'] << process_section(citation['schema:about']) unless citation['schema:about'].nil?
+          end
+        end 
+      end       
     end
     
     ret
@@ -117,6 +126,9 @@ private
     authors = []
     
     section.each do |key, value|
+      
+      puts "looking at #{key} -> #{value}"
+      
       
       if key == '@id'
         resource_attributes[:local_id] = value
