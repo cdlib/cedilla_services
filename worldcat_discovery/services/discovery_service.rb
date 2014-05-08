@@ -38,8 +38,8 @@ class DiscoveryService < CedillaService
     if citation.oclc.nil? and citation.isbn.nil? and citation.eisbn.nil? and citation.issn.nil? and
                                                   citation.eissn.nil? and citation.lccn.nil?
                                                   
-      ret += "#{@target}/search?q=name:#{CGI.escape(title)}"
-      ret += "&au:#{citation.authors.first.last_name}" unless citation.authors.first.nil?
+      ret += "/search?q=name:#{CGI.escape(title)}"
+      ret += "&au=#{citation.authors.first.last_name}" unless citation.authors.first.nil?
       
     else
       id = citation.oclc unless citation.oclc.nil?
@@ -49,7 +49,7 @@ class DiscoveryService < CedillaService
       id = citation.issn unless citation.issn.nil?
       id = citation.lccn unless citation.lccn.nil?
       
-      ret += "#{@target}/data/#{CGI.escape(id)}"
+      ret += "/data/#{CGI.escape(id)}"
     end
 
     LOGGER.info "calling: #{ret}"
@@ -67,10 +67,15 @@ class DiscoveryService < CedillaService
       super(citation, headers)
       
     rescue Exception => e
+      puts e
+      
       if @response_status == 404
         return [Cedilla::Citation.new({})]
         
       else
+        LOGGER.debug "Exception in process_request(): " + e.message
+        LOGGER.debug e.backtrace
+        
         raise e
       end
     end
@@ -80,7 +85,7 @@ class DiscoveryService < CedillaService
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
   def process_response(status, headers, body)
-    ret = []
+    ret = {'citations' => []}
     attributes = {}
     
     LOGGER.debug "response status: #{status}"
@@ -95,7 +100,7 @@ class DiscoveryService < CedillaService
         if citation.is_a?(Hash)
           process_section(citation['schema:author']) unless citation['schema:author'].nil?
         
-          ret << process_section(citation['schema:about']) unless citation['schema:about'].nil?
+          ret['citations'] << process_section(citation['schema:about']) unless citation['schema:about'].nil?
         end
       end        
     end
@@ -182,7 +187,7 @@ private
         (citation_attributes[:issn] = value['schema:issn'] unless value['schema:issn'].nil?) if value.is_a?(Hash)
         
       else
-        puts "unmapped item ::::::: #{key} => #{value}"
+        LOGGER.debug "unmapped item ::::::: #{key} => #{value}"
       end
       
     end

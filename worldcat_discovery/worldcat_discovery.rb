@@ -24,8 +24,6 @@ class WorldcatDiscovery < Sinatra::Application
     begin  
       data = request.body.read
       
-      puts Cedilla::Translator.from_cedilla_json(data)
-      
       # Capture the ID passed in by the caller because we need to send it back to them
       id = JSON.parse(data)['id']
     
@@ -42,19 +40,12 @@ class WorldcatDiscovery < Sinatra::Application
           payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
           
         else
-          new_citation = service.process_request(citation, {})
+          new_citations = service.process_request(citation, {})
           
-          if new_citation.is_a?(Cedilla::Citation)
-            payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
-            status 200
+          payload = Cedilla::Translator.to_cedilla_json(id, new_citations)
+          status 200
             
-            LOGGER.info "Response received from endpoint for id: #{id}"
-            
-          else
-            LOGGER.info "Response from endpoint was empty for id: #{id}"
-            status 404
-            payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
-          end
+          LOGGER.info "Response received from endpoint for id: #{id}"
         end
         
       rescue Exception => e
