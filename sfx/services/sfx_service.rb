@@ -23,20 +23,20 @@ class SfxService < CedillaService
   # 
   # -------------------------------------------------------------------------
   def add_citation_to_target(citation)
-    # Let the translator handle the construction of the URI IF this is an HTTP GET
-    hash = citation.to_hash
     target = "#{build_target}"
-    
-    # Get only the 'rft.' prefixed OpenUrl values
-    params = hash.select{ |k,v| k.index('rft.') == 0 }
-    
     target += '&' unless target[-1] == '&' or target[-1] == '?'
-    target += params.collect{ |k,v| "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}" }.join('&')
     
-    target += '&' unless target[-1] == '&' or target[-1] == '?'
-    target += citation.others.collect{ |i| parts = i.split('='); "#{URI.escape(parts[0])}=#{URI.escape(parts[1])}" }.join('&')
+    hash = citation.to_hash
+    target += hash.collect{ |k,v| 
+      "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}" unless ['authors','others','short_titles'].include?(k)
+    }.join('&')
     
-puts "calling: #{target}"
+    target += '&' unless target[-1] == '&' or target[-1] == '?'    
+    
+    auth = citation.authors.first
+    target += auth.to_hash.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v)}" }.join('&') unless auth.nil?
+
+    target += citation.others.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v.to_s)}" }.join('&')
     
     target
   end
@@ -49,8 +49,6 @@ puts "calling: #{target}"
     
     citation = Cedilla::Citation.new
     
-puts doc
-    
     doc.xpath("//sfx_menu//targets//target").each do |target|
 
       params = {}
@@ -60,13 +58,13 @@ puts doc
       
       if type == "abstract"   # Source of an Abstract
         # Go get the abstract and add it to the citation
-        params = {:source => target.xpath("target_public_name").text,
-                  :target => target.xpath("target_url").text,
-                  :local_id => target.xpath("target_service_id").text,
-                  :charset => target.xpath("char_set").text,
-                  :description => target.xpath("note").text,
-                  :format => 'extra',
-                  :availability => true}
+#        params = {:source => target.xpath("target_public_name").text,
+#                  :target => target.xpath("target_url").text,
+#                  :local_id => target.xpath("target_service_id").text,
+#                  :charset => target.xpath("char_set").text,
+#                  :description => target.xpath("note").text,
+#                  :format => 'extra',
+#                  :availability => true}
         
         
       elsif ['fulltxt', 'selectedfulltxt'].include?(type)  # Full Text
@@ -81,46 +79,46 @@ puts doc
       elsif type == 'doi'  # Highlighted Link
         
       elsif type == "holding"                  # Physical item
-        params = {:source => target.xpath("target_public_name").text,
-                  :catalog_target => target.xpath("target_url").text,
-                  :local_id => target.xpath("target_service_id").text,
-                  :charset => target.xpath("char_set").text,
-                  :note => target.xpath("note").text,
-                  :format => 'print',
-                  :availability => true}
+#        params = {:source => target.xpath("target_public_name").text,
+#                  :catalog_target => target.xpath("target_url").text,
+#                  :local_id => target.xpath("target_service_id").text,
+#                  :charset => target.xpath("char_set").text,
+#                  :note => target.xpath("note").text,
+#                  :format => 'print',
+#                  :availability => true}
         
       elsif type == "documentdelivery"         # ILL
-        params = {:source => target.xpath("target_public_name").text,
-                  :catalog_target => target.xpath("target_url").text,
-                  :local_id => target.xpath("target_service_id").text,
-                  :charset => target.xpath("char_set").text,
-                  :note => target.xpath("note").text,
-                  :format => 'print',
-                  :availability => true}
+#        params = {:source => target.xpath("target_public_name").text,
+#                  :catalog_target => target.xpath("target_url").text,
+#                  :local_id => target.xpath("target_service_id").text,
+#                  :charset => target.xpath("char_set").text,
+#                  :note => target.xpath("note").text,
+#                  :format => 'print',
+#                  :availability => true}
         
       elsif type == "reference"                # Citation Export Tools
-        query = target.xpath("target_url").text
+#        query = target.xpath("target_url").text
         
         #puts "Original: #{query}"
         #puts "Stripped: #{query.sub(/&openurl=.+&?/, '')}"
         
         # Remove any openurl values because they are redundant
-        query = query.sub(/&url=.+&?/, '')
-        query = query.sub(/&openurl=.+&?/, '')
+#        query = query.sub(/&url=.+&?/, '')
+#        query = query.sub(/&openurl=.+&?/, '')
         
-        hash = CedillaUtilities.query_string_to_hash(query[(query.index('?') + 1)..query.size])
+#        hash = CedillaUtilities.query_string_to_hash(query[(query.index('?') + 1)..query.size])
         
-        citation.combine(@response_translator.hash_to_citation(hash))
+#        citation.combine(@response_translator.hash_to_citation(hash))
         
                   
       elsif type == "citedjournal"             # Services that show where the item has been cited
-        params = {:source => target.xpath("target_public_name").text,
-                  :catalog_target => target.xpath("target_url").text,
-                  :local_id => target.xpath("target_service_id").text,
-                  :charset => target.xpath("char_set").text,
-                  :note => target.xpath("note").text,
-                  :format => 'extra',
-                  :availability => true}
+#        params = {:source => target.xpath("target_public_name").text,
+#                  :catalog_target => target.xpath("target_url").text,
+#                  :local_id => target.xpath("target_service_id").text,
+#                  :charset => target.xpath("char_set").text,
+#                  :note => target.xpath("note").text,
+#                  :format => 'extra',
+#                  :availability => true}
                   
       elsif type == 'toc'  # Table of Contents
         
