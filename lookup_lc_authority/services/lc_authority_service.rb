@@ -27,12 +27,12 @@ class LcAuthorityService < CedillaService
     ret = "#{build_target}"
     
     unless citation.authors.first.nil?
-      ret += "local.FamilyName = \"#{citation.authors.first.last_name.downCase}\" " unless citation.authors.first.last_name.nil?
+      ret += "local.FamilyName = \"#{citation.authors.first.last_name.downcase}\" " unless citation.authors.first.last_name.nil?
       
-      ret += "#{ret[-1] != '=' ? 'and ' : ''}local.FirstName = \"#{citation.authors.first.first_name.downCase}\" " unless citation.authors.first.fist_name.nil?
+      ret += "#{ret[-1] != '=' ? 'and ' : ''}local.FirstName = \"#{citation.authors.first.first_name.downcase}\" " unless citation.authors.first.first_name.nil?
     end
     
-    puts ret
+puts ret
     ret
   end
   

@@ -30,6 +30,10 @@ class Sfx < Sinatra::Application
       LOGGER.info "Received request for id: #{id}"
       LOGGER.debug data 
       
+      puts "#{data}\n\n"
+      
+      puts "citation: #{Cedilla::Translator.from_cedilla_json(data)}\n\n"
+      
       citation = Cedilla::Translator.from_cedilla_json(data)
       
       begin

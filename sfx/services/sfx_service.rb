@@ -26,17 +26,25 @@ class SfxService < CedillaService
     target = "#{build_target}"
     target += '&' unless target[-1] == '&' or target[-1] == '?'
     
-    hash = citation.to_hash
-    target += hash.collect{ |k,v| 
-      "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}" unless ['authors','others','short_titles'].include?(k)
-    }.join('&')
+    original_citation = citation.others.select{ |entry| !entry['original_citation'].nil? }.flatten
     
-    target += '&' unless target[-1] == '&' or target[-1] == '?'    
+    if !original_citation.nil?
+      target += URI.escape(original_citation.first['original_citation'].to_s)
+      
+      puts target
+    else
+      hash = citation.to_hash
+      target += hash.collect{ |k,v| 
+        "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}" unless ['authors','others','short_titles'].include?(k)
+      }.join('&')
     
-    auth = citation.authors.first
-    target += auth.to_hash.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v)}" }.join('&') unless auth.nil?
+      target += '&' unless target[-1] == '&' or target[-1] == '?'    
+    
+      auth = citation.authors.first
+      target += auth.to_hash.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v)}" }.join('&') unless auth.nil?
 
-    target += citation.others.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v.to_s)}" }.join('&')
+      target += citation.others.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v.to_s)}" }.join('&')
+    end
     
     target
   end
