@@ -81,6 +81,8 @@ class XidService < CedillaService
       end
     end
     
+    puts attributes
+    
     Cedilla::Citation.new(attributes)
     
   end

@@ -4,6 +4,7 @@ gem 'rack'
 gem 'thin'
 gem 'sinatra'
 gem 'sinatra-contrib'
+gem 'nokogiri', "1.5.5"
 
 gem "cedilla"
 
