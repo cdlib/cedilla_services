@@ -13,7 +13,7 @@ class InternetArchiveService < CedillaService
   # -------------------------------------------------------------------------
   def initialize
     begin
-      config = YAML.load_file('./config/internet_archive.yaml')
+      config = YAML.load_file('./config/internet_archive.yml')
     
       super(config)
       

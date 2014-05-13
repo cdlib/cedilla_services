@@ -1,0 +1,20 @@
+max_attempts: 1
+
+target: 'http://www.archive.org/advancedsearch.php?'
+
+query_string: 'keep_apostrophes=true&fl[]=*&fmt=json&xmlsearch=Search&rows=999'
+
+http_method: 'get'
+http_timeout: 5
+http_error_on_non_200: true
+http_max_redirects: 5
+
+# Service specific values
+default_media_type: 'electronic'
+default_rating: 1
+
+citation_uri: 'q=title:?+AND+creator:?+AND+(mediatype:texts+OR+mediatype:audio+OR+mediatype:video)'
+
+resource_status: 'public domain'
+resource_availability: true
+resource_target_prefix: 'http://www.archive.org/stream/'
