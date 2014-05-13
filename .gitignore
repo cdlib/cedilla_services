@@ -31,3 +31,5 @@ worldcat_discovery/vendor/gems/**
 
 **/tmp
 **/log
+**/vendor
+
