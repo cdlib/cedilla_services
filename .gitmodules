@@ -1,0 +1,6 @@
+[submodule "worldcat_discovery/vendor/gems/oclc-auth-ruby"]
+	path = worldcat_discovery/vendor/gems/oclc-auth-ruby
+	url = https://github.com/OCLC-Developer-Network/oclc-auth-ruby.git
+[submodule "worldcat_discovery/vendor/gems/worldcat-discovery-ruby"]
+	path = worldcat_discovery/vendor/gems/worldcat-discovery-ruby
+	url = https://github.com/OCLC-Developer-Network/worldcat-discovery-ruby.git

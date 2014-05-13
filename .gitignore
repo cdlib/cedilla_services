@@ -26,10 +26,6 @@ Gemfile.lock
 
 /**/config/*.yaml
 
-# OCLC's Auth Gem is located at: https://github.com/OCLC-Developer-Network/oclc-auth-ruby
-worldcat_discovery/vendor/gems/**
-
 **/tmp
 **/log
-**/vendor
 
