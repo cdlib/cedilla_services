@@ -63,7 +63,8 @@ class SfxService < CedillaService
     
     citation = Cedilla::Citation.new
     
-    doc.xpath("//sfx_menu//targets//target").each do |target|
+    doc.xpath("//ctx_obj_set//ctx_obj_targets//target").each do |target|
+    #doc.xpath("//sfx_menu//targets//target").each do |target|
 
       params = {}
 
@@ -79,7 +80,6 @@ class SfxService < CedillaService
 #                  :description => target.xpath("note").text,
 #                  :format => 'extra',
 #                  :availability => true}
-        
         
       elsif ['fulltxt', 'selectedfulltxt'].include?(type)  # Full Text
         params = {:source => target.xpath("target_public_name").text,
