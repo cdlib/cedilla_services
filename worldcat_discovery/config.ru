@@ -2,7 +2,13 @@ require 'rubygems'
 require 'bundler'
 require 'sinatra'
 require 'yaml'
+
+require 'rdf/turtle'
+require 'rdf/rdfxml'
+require 'rest_client'
+
 require 'cedilla'
+
 require('./worldcat_discovery.rb')
 
 configure do

@@ -4,9 +4,10 @@ gem 'rack'
 gem 'thin'
 gem 'sinatra'
 gem 'sinatra-contrib'
-#gem 'rdf-rdfxml'
-#gem 'json-ld'
-#gem 'equivalent-xml'
+gem 'rdf-rdfxml'
+gem 'rdf-turtle'
+gem 'rest-client'
+
 gem 'oclc-auth'
 gem 'worldcat-discovery'
 

@@ -53,6 +53,12 @@ class SfxService < CedillaService
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
   def process_response(status, headers, body)
+    
+    LOGGER.debug "Response from SFX:"
+    LOGGER.debug "Headers: #{headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    LOGGER.debug "Body:"
+    LOGGER.debug body
+    
     doc = Nokogiri::XML(@response_body)
     
     citation = Cedilla::Citation.new
