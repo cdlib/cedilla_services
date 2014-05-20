@@ -50,6 +50,15 @@ class SfxService < CedillaService
   end
   
   # -------------------------------------------------------------------------
+  def process_request(citation, headers)
+    # TODO: Attache the IP address of the incoming caller
+    #req.ip=info:ofi/req/169.229.32.54
+    
+    # Simply append it to the end of the query string 
+    super.process_request(citation, headers)
+  end
+  
+  # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
   def process_response(status, headers, body)
