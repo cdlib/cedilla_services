@@ -29,3 +29,5 @@ Gemfile.lock
 **/tmp
 **/log
 
+**/*.xml
+

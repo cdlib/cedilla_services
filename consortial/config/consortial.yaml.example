@@ -1,0 +1,14 @@
+target: 'http://my.institution.org/consortial/data'
+
+http_method: 'get'
+http_timeout: 5
+http_error_on_non_200: true
+http_max_redirects: 5
+
+xml_file: './latest.xml'
+
+xpath_grouping: 'Root//Element1//Element2'
+
+xpath_campus_identifier: 'name'
+xpath_ip_range_start_attribute: 'IPrange@begin'
+xpath_ip_range_end_attribute: 'IPrange@end'
