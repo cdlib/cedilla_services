@@ -6,9 +6,15 @@ http_error_on_non_200: true
 http_max_redirects: 5
 
 xml_file: './latest.xml'
+max_age_days: 30
 
-xpath_grouping: 'Root//Element1//Element2'
+xpath_campus_grouping: 'Root//Element1//Element2'
+xpath_campus_name: '@attribute'
 
-xpath_campus_identifier: 'name'
-xpath_ip_range_start_attribute: 'IPrange@begin'
-xpath_ip_range_end_attribute: 'IPrange@end'
+xpath_ip_range_element: 'IPElement'
+xpath_ip_range_start: '@attribute'
+xpath_ip_range_end: '@attribute'
+
+xpath_vpn_range_element: 'VPNElement'
+xpath_vpn_range_start: '@attribute'
+xpath_vpn_range_end: '@attribute'
