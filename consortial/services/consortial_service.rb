@@ -66,6 +66,8 @@ class ConsortialService < CedillaService
           if @campus.to_s == campus.xpath(@config['xpath_campus_name']).to_s
             first_ip = campus.xpath(@config['xpath_ip_range_element']).first 
           
+            first_ip = campus.xpath(@config['xpath_vpn_range_element']).first if first_ip.nil?
+          
             # Always put the IP into the citation because the user may not be on their own campus (e.g student from UC Berkeley 
             # visitng UC Davis) so we should use whichever campus the send. SFX and other services will gate their access if 
             # necessary to the resources behind them
@@ -74,10 +76,21 @@ class ConsortialService < CedillaService
           end
       
         else
+          # Check the IP Ranges
           campus.xpath(@config['xpath_ip_range_element']).each do |range|
-            if @ip.to_s >= range.xpath(@config['xpath_ip_range_start']).to_s and @ip.to_s <= range.xpath(@config['xpath_ip_range_end']).to_s              
-              citation.others['campus'] = campus.xpath(@config['xpath_campus_name']) if citation.campus.nil?
+            if @ip.to_s >= range.xpath(@config['xpath_ip_range_start']).to_s and @ip.to_s <= range.xpath(@config['xpath_ip_range_end']).to_s
+              citation.others['campus'] = campus.xpath(@config['xpath_campus_name']) if citation.others['campus'].nil?
               found = true 
+            end
+          end
+          
+          # Check the VPN Ranges
+          unless found
+            campus.xpath(@config['xpath_vpn_range_element']).each do |range|
+              if @ip.to_s >= range.xpath(@config['xpath_vpn_range_start']).to_s and @ip.to_s <= range.xpath(@config['xpath_vpn_range_end']).to_s
+                citation.others['campus'] = campus.xpath(@config['xpath_campus_name']) if citation.others['campus'].nil?
+                found = true 
+              end
             end
           end
         end

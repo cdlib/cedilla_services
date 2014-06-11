@@ -20,7 +20,6 @@ class Consortial < Sinatra::Application
   post '/consortial' do
     headers['Content-Type'] = 'text/json'
     payload = ""
-    service = ConsortialService.new
     
     request.body.rewind  # Just a safety in case its already been read
   
@@ -40,29 +39,21 @@ class Consortial < Sinatra::Application
       citation = Cedilla::Translator.from_cedilla_json(data)
       
       begin
-        if citation_valid?(citation) or !request.ip.nil?
-          new_citation = service.process_request(citation, {:ip => request.ip})
-          
-          if new_citation.is_a?(Cedilla::Citation)
-            payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
-            status 200
-            
-            LOGGER.info "Response received from endpoint for id: #{id}"
-            
-          else
-            LOGGER.info "Response from endpoint was empty for id: #{id}"
-            status 404
-            payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
-          end
+        new_citation = handle_request(citation, request.ip)
+      
+        if new_citation.is_a?(Cedilla::Citation)
+          payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
+          status 200
+        
+          LOGGER.info "Response received from endpoint for id: #{id}"
+        
         else
-          # No ISBN or ISSN was passed, which this service requires so just send back a 404 Not Found
-          LOGGER.info "Request did not contain enough info to contact enpoint for id: #{id}"
-          status 404  
+          LOGGER.info "Response from endpoint was empty for id: #{id}"
+          status 404
           payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
         end
-        
+          
       rescue Exception => e
-        # Errors at this level should return a 500 level error
         status 500
         
         if e.is_a?(Cedilla::Error)
@@ -78,18 +69,111 @@ class Consortial < Sinatra::Application
     rescue Exception => e
       # JSON parse exception should throw an invalid request!
       request.body.rewind
-      
+    
       LOGGER.error "Error --> #{e.message}"
       LOGGER.error "Request --> #{request.body.read}"
       LOGGER.error "#{e.backtrace}"
       status 400
-    end
+    end  
     
     LOGGER.debug payload
     
     payload
     
   end
+  
+  # ---------------------------------------------------------------------------------
+  get "/campus/:code" do
+    citation = Cedilla::Citation.new({:campus => params[:code]})
+    payload = ""
+    
+    LOGGER.info "Received request for /campus/#{params[:code]} from #{request.ip}"
+    
+    begin
+      new_citation = handle_request(citation, request.ip)
+    
+      if new_citation.is_a?(Cedilla::Citation)
+        payload = new_citation.others['ip'] || "unknown"
+        status 200
+      
+        LOGGER.info "Response received from endpoint for /campus request: #{params[:campus]}"
+      
+      else
+        LOGGER.info "Response from endpoint was empty for /campus request: #{params[:campus]}"
+        payload = "unknown"
+        status 404
+      end
+        
+    rescue Exception => e
+      status 500
+      
+      LOGGER.error "Error for ip: #{request.ip} --> #{e.message}"
+      LOGGER.error "#{e.backtrace}"
+    end
+    
+    payload
+  end
+  
+  # ---------------------------------------------------------------------------------
+  get "/ip" do
+    citation = Cedilla::Citation.new()
+    payload = ""
+    
+    LOGGER.info "Received request for /ip from #{request.ip}"
+    
+    begin
+      new_citation = handle_request(citation, request.ip)
+    
+      if new_citation.is_a?(Cedilla::Citation)
+        payload = new_citation.others['campus'] || "unknown"
+        status 200
+      
+        LOGGER.info "Response received from endpoint for /ip request: #{request.ip}"
+      
+      else
+        LOGGER.info "Response from endpoint was empty for /ip request: #{request.ip}"
+        payload = "unknown"
+        status 404
+      end
+        
+    rescue Exception => e
+      status 500
+      
+      LOGGER.error "Error for ip: #{request.ip} --> #{e.message}"
+      LOGGER.error "#{e.backtrace}"
+    end
+    
+    payload
+  end
+  
+  # ---------------------------------------------------------------------------------
+  def handle_request(citation, ip) 
+    new_citation = nil
+    service = ConsortialService.new
+    
+    begin
+      if citation_valid?(citation) or !ip.nil?
+        new_citation = service.process_request(citation, {:ip => ip})
+        
+      else
+        new_citation = Cedilla::Citation.new
+      end
+      
+    rescue Exception => e
+      if e.is_a?(Cedilla::Error)
+        raise e
+
+      else
+        LOGGER.error "Error for ip: #{ip} --> #{e.message}"
+        LOGGER.error "#{e.backtrace}"
+        
+        raise Cedilla::Error.new(Cedilla::Error::LEVELS[:error], "An error occurred while processing the request.")
+      end
+    end
+  
+    new_citation
+  end
+  
   
   # ---------------------------------------------------------------------------------
   def citation_valid?(citation)
