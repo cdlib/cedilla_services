@@ -36,6 +36,8 @@ class Sfx < Sinatra::Application
       
       citation = Cedilla::Translator.from_cedilla_json(data)
       
+      citation.ip = request.ip if citation.ip.nil?
+      
       begin
         if !citation_valid?(citation)
           # No ISBN or ISSN was passed, which this service requires so just send back a 404 Not Found
@@ -69,6 +71,7 @@ class Sfx < Sinatra::Application
         else
           LOGGER.error "Error for id: #{id} --> #{e.message}"
           LOGGER.error "#{e.backtrace}"
+          
           payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Error.new(Cedilla::Error::LEVELS[:error], "An error occurred while processing the request."))
         end
       end

@@ -25,38 +25,34 @@ class SfxService < CedillaService
   def add_citation_to_target(citation)
     target = "#{build_target}"
     target += '&' unless target[-1] == '&' or target[-1] == '?'
-    
-    original_citation = citation.others.select{ |entry| !entry['original_citation'].nil? }.flatten
-    
-    if !original_citation.nil?
-      target += URI.escape(original_citation.first['original_citation'].to_s)
-      
-      puts target
-    else
-      hash = citation.to_hash
-      target += hash.collect{ |k,v| 
-        "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}" unless ['authors','others','short_titles'].include?(k)
-      }.join('&')
-    
-      target += '&' unless target[-1] == '&' or target[-1] == '?'    
-    
-      auth = citation.authors.first
-      target += auth.to_hash.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v)}" }.join('&') unless auth.nil?
 
-      target += citation.others.collect{ |k, v| "#{URI.escape(k)}=#{URI.escape(v.to_s)}" }.join('&')
-    end
+    target += URI.escape("rfr_id=info:sid/#{@config['sid_identifier'] || 'CEDILLA'}")
+    target += "&#{URI.escape(citation.original_citation).gsub('&amp;', '&')}"
+
+    ver = (target.include?('Z39.88-2004') || target.include?('rft.')) ? '1_0' : '0_1'
     
+    hash = citation.to_hash
+    
+    hash.each do |key, value|
+      translation = @config["openurl_#{ver}"][key]
+      
+      if !translation.nil?
+        if translation.is_a?(Array)
+          entry = "#{URI.escape(translation[0].to_s)}=#{URI.escape(translation[1].to_s.sub('?', value.to_s))}"
+          target += "&#{entry}" unless target.include?(entry)
+          
+        else
+          entry = "#{URI.escape(translation.to_s)}=#{URI.escape(value.to_s)}"
+          target += "&#{entry}" unless target.include?(entry)
+        end
+        
+      end
+      
+    end
+
     target
   end
   
-  # -------------------------------------------------------------------------
-  def process_request(citation, headers)
-    # TODO: Attache the IP address of the incoming caller
-    #req.ip=info:ofi/req/169.229.32.54
-    
-    # Simply append it to the end of the query string 
-    super.process_request(citation, headers)
-  end
   
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
@@ -68,89 +64,90 @@ class SfxService < CedillaService
     LOGGER.debug "Body:"
     LOGGER.debug body
     
-    doc = Nokogiri::XML(@response_body)
+    begin
+      doc = Nokogiri::XML(@response_body)
     
-    citation = Cedilla::Citation.new
+      citation = Cedilla::Citation.new
     
-    doc.xpath("//ctx_obj_set//ctx_obj_targets//target").each do |target|
-    #doc.xpath("//sfx_menu//targets//target").each do |target|
+      doc.xpath("//ctx_obj_set//ctx_obj_targets//target").each do |target|
+      #doc.xpath("//sfx_menu//targets//target").each do |target|
 
-      params = {}
+        params = {}
 
-      # Figure out what the service type is
-      type = target.xpath("service_type").text.downcase.sub('get', '')
+        # Figure out what the service type is
+        type = target.xpath("service_type").text.downcase.sub('get', '')
       
-      if type == "abstract"   # Source of an Abstract
-        # Go get the abstract and add it to the citation
-#        params = {:source => target.xpath("target_public_name").text,
-#                  :target => target.xpath("target_url").text,
-#                  :local_id => target.xpath("target_service_id").text,
-#                  :charset => target.xpath("char_set").text,
-#                  :description => target.xpath("note").text,
-#                  :format => 'extra',
-#                  :availability => true}
+        if type == "abstract"   # Source of an Abstract
+          # Go get the abstract and add it to the citation
+  #        params = {:source => target.xpath("target_public_name").text,
+  #                  :target => target.xpath("target_url").text,
+  #                  :local_id => target.xpath("target_service_id").text,
+  #                  :charset => target.xpath("char_set").text,
+  #                  :description => target.xpath("note").text,
+  #                  :format => 'extra',
+  #                  :availability => true}
         
-      elsif ['fulltxt', 'selectedfulltxt'].include?(type)  # Full Text
-        params = {:source => target.xpath("target_public_name").text,
-                  :target => target.xpath("target_url").text,
-                  :local_id => target.xpath("target_service_id").text,
-                  :charset => target.xpath("char_set").text,
-                  :description => target.xpath("note").text,
-                  :format => 'electronic',
-                  :availability => true}
+        elsif ['fulltxt', 'selectedfulltxt'].include?(type)  # Full Text
+          params = {:source => target.xpath("target_public_name").text,
+                    :target => target.xpath("target_url").text,
+                    :local_id => target.xpath("target_service_id").text,
+                    :charset => target.xpath("char_set").text,
+                    :description => target.xpath("note").text,
+                    :format => 'electronic',
+                    :availability => true}
                   
-      elsif type == 'doi'  # Highlighted Link
+        elsif type == 'doi'  # Highlighted Link
         
-      elsif type == "holding"                  # Physical item
-#        params = {:source => target.xpath("target_public_name").text,
-#                  :catalog_target => target.xpath("target_url").text,
-#                  :local_id => target.xpath("target_service_id").text,
-#                  :charset => target.xpath("char_set").text,
-#                  :note => target.xpath("note").text,
-#                  :format => 'print',
-#                  :availability => true}
+        elsif type == "holding"                  # Physical item
+  #        params = {:source => target.xpath("target_public_name").text,
+  #                  :catalog_target => target.xpath("target_url").text,
+  #                  :local_id => target.xpath("target_service_id").text,
+  #                  :charset => target.xpath("char_set").text,
+  #                  :note => target.xpath("note").text,
+  #                  :format => 'print',
+  #                  :availability => true}
         
-      elsif type == "documentdelivery"         # ILL
-#        params = {:source => target.xpath("target_public_name").text,
-#                  :catalog_target => target.xpath("target_url").text,
-#                  :local_id => target.xpath("target_service_id").text,
-#                  :charset => target.xpath("char_set").text,
-#                  :note => target.xpath("note").text,
-#                  :format => 'print',
-#                  :availability => true}
+        elsif type == "documentdelivery"         # ILL
+  #        params = {:source => target.xpath("target_public_name").text,
+  #                  :catalog_target => target.xpath("target_url").text,
+  #                  :local_id => target.xpath("target_service_id").text,
+  #                  :charset => target.xpath("char_set").text,
+  #                  :note => target.xpath("note").text,
+  #                  :format => 'print',
+  #                  :availability => true}
         
-      elsif type == "reference"                # Citation Export Tools
-#        query = target.xpath("target_url").text
+        elsif type == "reference"                # Citation Export Tools
+  #        query = target.xpath("target_url").text
         
-        #puts "Original: #{query}"
-        #puts "Stripped: #{query.sub(/&openurl=.+&?/, '')}"
+          #puts "Original: #{query}"
+          #puts "Stripped: #{query.sub(/&openurl=.+&?/, '')}"
         
-        # Remove any openurl values because they are redundant
-#        query = query.sub(/&url=.+&?/, '')
-#        query = query.sub(/&openurl=.+&?/, '')
+          # Remove any openurl values because they are redundant
+  #        query = query.sub(/&url=.+&?/, '')
+  #        query = query.sub(/&openurl=.+&?/, '')
         
-#        hash = CedillaUtilities.query_string_to_hash(query[(query.index('?') + 1)..query.size])
+  #        hash = CedillaUtilities.query_string_to_hash(query[(query.index('?') + 1)..query.size])
         
-#        citation.combine(@response_translator.hash_to_citation(hash))
+  #        citation.combine(@response_translator.hash_to_citation(hash))
         
                   
-      elsif type == "citedjournal"             # Services that show where the item has been cited
-#        params = {:source => target.xpath("target_public_name").text,
-#                  :catalog_target => target.xpath("target_url").text,
-#                  :local_id => target.xpath("target_service_id").text,
-#                  :charset => target.xpath("char_set").text,
-#                  :note => target.xpath("note").text,
-#                  :format => 'extra',
-#                  :availability => true}
+        elsif type == "citedjournal"             # Services that show where the item has been cited
+  #        params = {:source => target.xpath("target_public_name").text,
+  #                  :catalog_target => target.xpath("target_url").text,
+  #                  :local_id => target.xpath("target_service_id").text,
+  #                  :charset => target.xpath("char_set").text,
+  #                  :note => target.xpath("note").text,
+  #                  :format => 'extra',
+  #                  :availability => true}
                   
-      elsif type == 'toc'  # Table of Contents
+        elsif type == 'toc'  # Table of Contents
         
-      elsif type == 'webservice'   # Webservices like 'Ask a Librarian'
+        elsif type == 'webservice'   # Webservices like 'Ask a Librarian'
         
       
-      end
+        end
       
-      resource = Cedilla::Resource.new(params) unless params.empty?
+        resource = Cedilla::Resource.new(params) unless params.empty?
 
 =begin                 
       # If the broker callback was registered and the resource is electronic
@@ -172,12 +169,18 @@ end
         citation.resources << resource unless citation.has_resource?(resource) or resource.nil?
       end
 =end
-
-      citation.resources << resource unless citation.has_resource?(resource) or resource.nil?
+        citation.resources << resource unless citation.has_resource?(resource) or resource.nil?
       
+      end
+    
+    rescue Exception => e
+      LOGGER.error(e.message)
+      LOGGER.error(e.backtrace)
+      
+      raise Cedilla::Error.new('fatal', 'Unable to process the XML response from SFX!')
     end
     
-    #puts citation.inspect
+    puts citation.inspect
     
     citation
     

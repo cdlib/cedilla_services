@@ -39,7 +39,9 @@ class Consortial < Sinatra::Application
       citation = Cedilla::Translator.from_cedilla_json(data)
       
       begin
-        new_citation = handle_request(citation, request.ip)
+        citation.ip = request.ip
+        
+        new_citation = handle_request(citation)#, request.ip)
       
         if new_citation.is_a?(Cedilla::Citation)
           payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
@@ -90,7 +92,9 @@ class Consortial < Sinatra::Application
     LOGGER.info "Received request for /campus/#{params[:code]} from #{request.ip}"
     
     begin
-      new_citation = handle_request(citation, request.ip)
+      citation.ip = request.ip
+      
+      new_citation = handle_request(citation)#, request.ip)
     
       if new_citation.is_a?(Cedilla::Citation)
         payload = new_citation.others['ip'] || "unknown"
@@ -122,7 +126,9 @@ class Consortial < Sinatra::Application
     LOGGER.info "Received request for /ip from #{request.ip}"
     
     begin
-      new_citation = handle_request(citation, request.ip)
+      citation.ip = request.ip
+      
+      new_citation = handle_request(citation)#, request.ip)
     
       if new_citation.is_a?(Cedilla::Citation)
         payload = new_citation.others['campus'] || "unknown"
@@ -147,13 +153,13 @@ class Consortial < Sinatra::Application
   end
   
   # ---------------------------------------------------------------------------------
-  def handle_request(citation, ip) 
+  def handle_request(citation)#, ip) 
     new_citation = nil
     service = ConsortialService.new
     
     begin
-      if citation_valid?(citation) or !ip.nil?
-        new_citation = service.process_request(citation, {:ip => ip})
+      if citation_valid?(citation)# or !ip.nil?
+        new_citation = service.process_request(citation)#, {:ip => ip})
         
       else
         new_citation = Cedilla::Citation.new
@@ -164,7 +170,7 @@ class Consortial < Sinatra::Application
         raise e
 
       else
-        LOGGER.error "Error for ip: #{ip} --> #{e.message}"
+        LOGGER.error "Error for ip: #{citation.ip} --> #{e.message}"
         LOGGER.error "#{e.backtrace}"
         
         raise Cedilla::Error.new(Cedilla::Error::LEVELS[:error], "An error occurred while processing the request.")
@@ -178,7 +184,8 @@ class Consortial < Sinatra::Application
   # ---------------------------------------------------------------------------------
   def citation_valid?(citation)
     # If the citation has a campus
-    citation.others.include?('campus')
+    !citation.campus.nil? || !citation.ip.nil?
+#    citation.others.include?('campus')
   end
   
 end

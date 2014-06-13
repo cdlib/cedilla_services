@@ -19,7 +19,7 @@ class ConsortialService < CedillaService
   end
   
   # -------------------------------------------------------------------------
-  def process_request(citation, headers)
+  def process_request(citation)#, headers)
     # If the data in the local XML file is outdated OR the file doesn't exist
     if File.exists?(@config['xml_file'])
       last_updated = File.new(@config['xml_file'], "r").mtime 
@@ -30,8 +30,10 @@ class ConsortialService < CedillaService
       download_data
     end
     
-    @campus = citation.others['campus'] unless citation.others.nil?
-    @ip = headers[:ip] 
+    @campus = citation.campus
+    @ip = citation.ip 
+#    @campus = citation.others['campus'] unless citation.others.nil?
+#    @ip = headers[:ip] 
     
     # Load the cross reference data from disk
     if File.exists?(@config['xml_file'])
@@ -64,14 +66,20 @@ class ConsortialService < CedillaService
       unless found
         if !@campus.nil?
           if @campus.to_s == campus.xpath(@config['xpath_campus_name']).to_s
-            first_ip = campus.xpath(@config['xpath_ip_range_element']).first 
-          
-            first_ip = campus.xpath(@config['xpath_vpn_range_element']).first if first_ip.nil?
-          
+            
             # Always put the IP into the citation because the user may not be on their own campus (e.g student from UC Berkeley 
             # visitng UC Davis) so we should use whichever campus the send. SFX and other services will gate their access if 
             # necessary to the resources behind them
-            citation.others['ip'] = first_ip.xpath(@config['xpath_ip_range_start'])
+            first_ip = campus.xpath(@config['xpath_vpn_range_element']).first
+            
+            if first_ip.nil?
+              first_ip = campus.xpath(@config['xpath_ip_range_element']).first if first_ip.nil?
+          
+              citation.others['ip'] = first_ip.xpath(@config['xpath_ip_range_start'])
+            else
+              citation.others['ip'] = first_ip.xpath(@config['xpath_vpn_range_start'])
+            end
+            
             found = true
           end
       

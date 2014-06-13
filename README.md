@@ -141,7 +141,7 @@ objects:
         - cover_elsevier
         - cover_open_library
 
-...
+    ...
 
 # Define the minimum amount of citation information required to process a service. The options MUST match attributes on the Citation object!
 # Items within an array indicate an OR relationship and items on different lines indicate an AND relationship so:
@@ -175,3 +175,7 @@ minimum_item_groups:
 
   ...
 ```
+
+## License
+
+The Cedilla Services Project adheres to the [BSD 3 Clause](./LICENSE.md) license agreement.
