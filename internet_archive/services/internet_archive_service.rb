@@ -1,3 +1,4 @@
+require 'cedilla/service'
 require 'multi_json'
 
 # -------------------------------------------------------------------------
@@ -5,7 +6,7 @@ require 'multi_json'
 #
 # Would likely sit in another file within the project
 # -------------------------------------------------------------------------
-class InternetArchiveService < CedillaService
+class InternetArchiveService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -24,7 +25,7 @@ class InternetArchiveService < CedillaService
   end
   
   # -------------------------------------------------------------------------
-  def process_response(status, headers, body)
+  def process_response
     new_citation = Cedilla::Citation.new
     
     begin
@@ -74,6 +75,9 @@ class InternetArchiveService < CedillaService
 
 # -----------------------------------------------------------------------------
   def add_citation_to_target(citation)
+    
+    puts citation.inspect
+    
     target = "#{build_target}"
 
     title = citation.book_title.nil? ? URI.escape(citation.title) : URI.escape(citation.book_title)

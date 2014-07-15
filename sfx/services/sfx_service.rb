@@ -27,28 +27,35 @@ class SfxService < CedillaService
     target += '&' unless target[-1] == '&' or target[-1] == '?'
 
     target += URI.escape("rfr_id=info:sid/#{@config['sid_identifier'] || 'CEDILLA'}")
-    target += "&#{URI.escape(citation.original_citation).gsub('&amp;', '&')}"
+    target += "&#{citation.original_citation}"
 
     ver = (target.include?('Z39.88-2004') || target.include?('rft.')) ? '1_0' : '0_1'
     
     hash = citation.to_hash
     
     hash.each do |key, value|
-      translation = @config["openurl_#{ver}"][key]
+      # Only add items that are not already included in the original citation!
+      unless target.include?("#{key}=")
+        translation = @config["openurl_#{ver}"][key]
       
-      if !translation.nil?
-        if translation.is_a?(Array)
-          entry = "#{URI.escape(translation[0].to_s)}=#{URI.escape(translation[1].to_s.sub('?', value.to_s))}"
-          target += "&#{entry}" unless target.include?(entry)
+        unless value.nil?
+          # Only include items that have a translation!
+          if !translation.nil?
+            if translation.is_a?(Array)
+              entry = "#{URI.escape(translation[0].to_s)}=#{URI.escape(translation[1].to_s.sub('?', value.to_s))}" unless value.to_s == ''
+              target += "&#{entry}" unless target.include?(entry) unless entry.nil?
           
-        else
-          entry = "#{URI.escape(translation.to_s)}=#{URI.escape(value.to_s)}"
-          target += "&#{entry}" unless target.include?(entry)
-        end
+            else
+              entry = "#{URI.escape(translation.to_s)}=#{URI.escape(value.to_s)}" unless value.to_s == ''
+              target += "&#{entry}" unless target.include?(entry) unless entry.nil?
+            end
+          end
+        end # unless value.nil?
         
-      end
-      
+      end #unless target.include?
     end
+
+puts "calling: #{target}"
 
     target
   end

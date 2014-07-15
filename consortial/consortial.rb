@@ -128,7 +128,7 @@ class Consortial < Sinatra::Application
     begin
       citation.ip = request.ip
       
-      new_citation = handle_request(citation)#, request.ip)
+      new_citation = handle_request(citation)
     
       if new_citation.is_a?(Cedilla::Citation)
         payload = new_citation.others['campus'] || "unknown"
@@ -151,6 +151,41 @@ class Consortial < Sinatra::Application
     
     payload
   end
+  
+  # ---------------------------------------------------------------------------------
+  get "/ip/:ip" do
+    citation = Cedilla::Citation.new()
+    payload = ""
+    
+    LOGGER.info "Received request for /ip : #{URI.unescape(params['ip'])}"
+    
+    begin
+      citation.ip = URI.unescape(params['ip'])
+      
+      new_citation = handle_request(citation)
+    
+      if new_citation.is_a?(Cedilla::Citation)
+        payload = new_citation.others['campus'] || "unknown"
+        status 200
+      
+        LOGGER.info "Response received from endpoint for /ip request: #{request.ip}"
+      
+      else
+        LOGGER.info "Response from endpoint was empty for /ip request: #{request.ip}"
+        payload = "unknown"
+        status 404
+      end
+        
+    rescue Exception => e
+      status 500
+      
+      LOGGER.error "Error for ip: #{request.ip} --> #{e.message}"
+      LOGGER.error "#{e.backtrace}"
+    end
+    
+    payload
+  end
+  
   
   # ---------------------------------------------------------------------------------
   def handle_request(citation)#, ip) 

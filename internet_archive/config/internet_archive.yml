@@ -2,6 +2,8 @@ max_attempts: 1
 
 target: 'http://www.archive.org/advancedsearch.php?'
 
+minimum_api_version: 1.1
+
 query_string: 'keep_apostrophes=true&fl[]=*&fmt=json&xmlsearch=Search&rows=999'
 
 http_method: 'get'
