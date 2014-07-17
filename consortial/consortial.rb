@@ -1,110 +1,37 @@
-require 'cedilla/error'
-
-require('./services/consortial_service.rb')
+require 'nokogiri'
 
 # This service provides a cross reference lookup between campus and IP address. It does not perform any validation. The subsequent information
 # is then passed on to SFX and other services that are dependent on the user's physical location.
 
 class Consortial < Sinatra::Application
   
-  default = "The Consortial service is expecting an HTTP POST with a JSON message similar to the examples found on: " +
-            "<a href='https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services'>" +
-            "Cedilla Delivery Aggregator Wiki</a>"
+  def initialize
+    begin
+      @config = YAML.load_file('./config/consortial.yaml')
   
-  # -------------------------------------------------------------------------
-  get '/consortial' do
-    default
-  end
-  
-  # -------------------------------------------------------------------------
-  post '/consortial' do
-    headers['Content-Type'] = 'text/json'
-    payload = ""
+      super(@config)
     
-    request.body.rewind  # Just a safety in case its already been read
-  
-    begin  
-      data = request.body.read
-      
-      # Capture the ID passed in by the caller because we need to send it back to them
-      id = JSON.parse(data)['id']
-    
-      LOGGER.info "Received request for id: #{id}"
-      LOGGER.debug data 
-      
-      puts "#{data}\n\n"
-      
-      puts "citation: #{Cedilla::Translator.from_cedilla_json(data)}\n\n"
-      
-      citation = Cedilla::Translator.from_cedilla_json(data)
-      
-      begin
-        citation.ip = request.ip
-        
-        new_citation = handle_request(citation)#, request.ip)
-      
-        if new_citation.is_a?(Cedilla::Citation)
-          payload = Cedilla::Translator.to_cedilla_json(id, new_citation)
-          status 200
-        
-          LOGGER.info "Response received from endpoint for id: #{id}"
-        
-        else
-          LOGGER.info "Response from endpoint was empty for id: #{id}"
-          status 404
-          payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Citation.new({}))
-        end
-          
-      rescue Exception => e
-        status 500
-        
-        if e.is_a?(Cedilla::Error)
-          # No logging here because the service itself should have written out to the log
-          payload = Cedilla::Translator.to_cedilla_json(id, e)
-        else
-          LOGGER.error "Error for id: #{id} --> #{e.message}"
-          LOGGER.error "#{e.backtrace}"
-          payload = Cedilla::Translator.to_cedilla_json(id, Cedilla::Error.new(Cedilla::Error::LEVELS[:error], "An error occurred while processing the request."))
-        end
-      end
-      
     rescue Exception => e
-      # JSON parse exception should throw an invalid request!
-      request.body.rewind
-    
-      LOGGER.error "Error --> #{e.message}"
-      LOGGER.error "Request --> #{request.body.read}"
-      LOGGER.error "#{e.backtrace}"
-      status 400
-    end  
-    
-    LOGGER.debug payload
-    
-    payload
-    
+      $stdout.puts "Unable to load configuration file!"
+    end
+  
+    super
   end
   
   # ---------------------------------------------------------------------------------
   get "/campus/:code" do
-    citation = Cedilla::Citation.new({:campus => params[:code]})
-    payload = ""
-    
-    LOGGER.info "Received request for /campus/#{params[:code]} from #{request.ip}"
+    translation = ''
     
     begin
-      citation.ip = request.ip
-      
-      new_citation = handle_request(citation)#, request.ip)
+      translation = process_request(params[:code], request.ip)
     
-      if new_citation.is_a?(Cedilla::Citation)
-        payload = new_citation.others['ip'] || "unknown"
+      if translation != 'unknown'
         status 200
       
-        LOGGER.info "Response received from endpoint for /campus request: #{params[:campus]}"
+        LOGGER.info "#{translation} received from endpoint for /campus/#{params[:campus]}"
       
       else
-        LOGGER.info "Response from endpoint was empty for /campus request: #{params[:campus]}"
-        payload = "unknown"
+        LOGGER.info "Could not translate /campus/#{params[:campus]}"
         status 404
       end
         
@@ -115,30 +42,23 @@ class Consortial < Sinatra::Application
       LOGGER.error "#{e.backtrace}"
     end
     
-    payload
+    translation
   end
   
   # ---------------------------------------------------------------------------------
   get "/ip" do
-    citation = Cedilla::Citation.new()
-    payload = ""
-    
-    LOGGER.info "Received request for /ip from #{request.ip}"
+    translation = ''
     
     begin
-      citation.ip = request.ip
-      
-      new_citation = handle_request(citation)
+      translation = process_request(nil, request.ip)
     
-      if new_citation.is_a?(Cedilla::Citation)
-        payload = new_citation.others['campus'] || "unknown"
+      if translation != 'unknown'
         status 200
       
-        LOGGER.info "Response received from endpoint for /ip request: #{request.ip}"
+        LOGGER.info "#{translation} received from endpoint for /ip"
       
       else
-        LOGGER.info "Response from endpoint was empty for /ip request: #{request.ip}"
-        payload = "unknown"
+        LOGGER.info "Could not translate /ip for #{request.ip}"
         status 404
       end
         
@@ -149,30 +69,23 @@ class Consortial < Sinatra::Application
       LOGGER.error "#{e.backtrace}"
     end
     
-    payload
+    translation
   end
   
   # ---------------------------------------------------------------------------------
   get "/ip/:ip" do
-    citation = Cedilla::Citation.new()
-    payload = ""
-    
-    LOGGER.info "Received request for /ip : #{URI.unescape(params['ip'])}"
+    translation = ''
     
     begin
-      citation.ip = URI.unescape(params['ip'])
-      
-      new_citation = handle_request(citation)
+      translation = process_request(nil, params[:ip])
     
-      if new_citation.is_a?(Cedilla::Citation)
-        payload = new_citation.others['campus'] || "unknown"
+      if translation != 'unknown'
         status 200
       
-        LOGGER.info "Response received from endpoint for /ip request: #{request.ip}"
+        LOGGER.info "#{translation} received from endpoint for /ip/#{params[:ip]}"
       
       else
-        LOGGER.info "Response from endpoint was empty for /ip request: #{request.ip}"
-        payload = "unknown"
+        LOGGER.info "Could not translate /ip/#{params[:ip]}"
         status 404
       end
         
@@ -183,44 +96,110 @@ class Consortial < Sinatra::Application
       LOGGER.error "#{e.backtrace}"
     end
     
-    payload
+    translation
   end
   
   
+private  
   # ---------------------------------------------------------------------------------
-  def handle_request(citation)#, ip) 
-    new_citation = nil
-    service = ConsortialService.new
+  def process_request(code, ip)
+    data = ''
     
-    begin
-      if citation_valid?(citation)# or !ip.nil?
-        new_citation = service.process_request(citation)#, {:ip => ip})
-        
-      else
-        new_citation = Cedilla::Citation.new
-      end
-      
-    rescue Exception => e
-      if e.is_a?(Cedilla::Error)
-        raise e
-
-      else
-        LOGGER.error "Error for ip: #{citation.ip} --> #{e.message}"
-        LOGGER.error "#{e.backtrace}"
-        
-        raise Cedilla::Error.new(Cedilla::Error::LEVELS[:error], "An error occurred while processing the request.")
-      end
+    # If the data in the local XML file is outdated OR the file doesn't exist
+    if File.exists?(@config['xml_file'])
+      last_updated = File.new(@config['xml_file'], "r").mtime 
+    
+      # If the number od days since the data was last downloaded is greater than the number of days specified in the config
+      download_data if ((Time.now - last_updated).to_i / (24 * 60 * 60) > @config['max_age_days'].to_i)
+    else
+      download_data
     end
-  
-    new_citation
+
+    # Load the cross reference data from disk
+    if File.exists?(@config['xml_file'])
+      data = File.open(@config['xml_file'], "r").read
+    end
+    
+    ret = 'unknown'
+    found = false
+    
+    doc = Nokogiri::XML(data)
+    
+    doc.xpath(@config["xpath_campus_grouping"]).each do |campus|
+      unless found
+        if !code.nil?
+          if code.to_s == campus.xpath(@config['xpath_campus_name']).to_s
+            
+            # Always put the IP into the citation because the user may not be on their own campus (e.g student from UC Berkeley 
+            # visitng UC Davis) so we should use whichever campus the send. SFX and other services will gate their access if 
+            # necessary to the resources behind them
+            first_ip = campus.xpath(@config['xpath_vpn_range_element']).first
+            
+            if first_ip.nil?
+              first_ip = campus.xpath(@config['xpath_ip_range_element']).first if first_ip.nil?
+          
+              ret = first_ip.xpath(@config['xpath_ip_range_start'])
+            else
+              ret = first_ip.xpath(@config['xpath_vpn_range_start'])
+            end
+            
+            found = true
+          end
+      
+        else
+          puts "looking for ip: #{ip} in #{campus}"
+          
+          # Check the IP Ranges
+          campus.xpath(@config['xpath_ip_range_element']).each do |range|
+            if ip.to_s >= range.xpath(@config['xpath_ip_range_start']).to_s and ip.to_s <= range.xpath(@config['xpath_ip_range_end']).to_s
+              ret = campus.xpath(@config['xpath_campus_name']) if ret == 'unknown'
+              found = true 
+            end
+          end
+          
+          # Check the VPN Ranges
+          unless found
+            campus.xpath(@config['xpath_vpn_range_element']).each do |range|
+              if ip.to_s >= range.xpath(@config['xpath_vpn_range_start']).to_s and ip.to_s <= range.xpath(@config['xpath_vpn_range_end']).to_s
+                ret = campus.xpath(@config['xpath_campus_name']) if ret == 'unknown'
+                found = true 
+              end
+            end
+          end
+        end
+      end # unless found
+    end
+    
+    ret
   end
-  
-  
-  # ---------------------------------------------------------------------------------
-  def citation_valid?(citation)
-    # If the citation has a campus
-    !citation.campus.nil? || !citation.ip.nil?
-#    citation.others.include?('campus')
+
+  # -------------------------------------------------------------------------
+  def download_data
+    target = @config['target']
+    
+    # Call the target
+    begin  
+      unless target.nil? or target.strip == ''
+        response = call_target(Cedilla::Citation.new, target, {}, 0)
+      end
+    
+    rescue => e
+      @response_status = response.code.to_i unless response.nil?
+      response.header.each_header{ |key,val| @response_headers["#{key.to_s}"] = val.to_s } unless response.nil?
+      @response_body = response.body.to_s unless response.nil?
+      raise
+    end
+    
+    unless response.nil?
+      # Save the XML to disk
+      file = File.new(@config['xml_file'], "w+")
+      
+      file.write(response.body.to_s)
+      file.flush
+      file.close
+    else
+      raise Exception.new("Unable to contact the target!")
+    end
+    
   end
-  
 end
