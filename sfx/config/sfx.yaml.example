@@ -1,10 +1,116 @@
 max_attempts: 1
 
-target: 'http://your.domain.org/sfx/address/'
+target: 'http://my.domain.org/path/to/sfx'
 
-query_string: 'sid:=EBSCO:a9h&sfx.response_type=simplexml&sfx.show_availability=1&sfx.ignore_date_threshold=1'
+minimum_api_version: 1.1
+
+query_string: 'sfx.response_type=multi_obj_detailed_xml&sfx.show_availability=1&'
 
 http_method: 'get'
 http_timeout: 5
 http_error_on_non_200: true
 http_max_redirects: 5
+
+sid_identifier: 'ORG:CEDILLA'
+
+openurl_0_1:
+  genre: 'genre'
+  ip: 'req.ip'
+  issn: ['id', 'issn:?']
+  eissn: ['id', 'issn:?']
+  isbn: ['id', 'isbn:?']
+  eisbn: ['id', 'isbn:?']
+  oclc: ['id', 'oclcnum:?']
+  lccn: ['id', 'lccn:?']
+  doi: ['id', 'doi:?']
+  pmid: ['id', 'pmid:?']
+  coden: ['id', 'coden:?']
+  sici: ['id', 'sici:?']
+  bici: ['id', 'bici:?']
+  title: 'title'
+  article_title: 'atitle'
+  journal_title: 'jtitle'
+  chapter_title: 'atitle'
+  book_title: 'btitle'
+  publisher: 'pub'
+  publication_date: 'date'
+  publication_place: 'place'
+  date: 'date'
+  year: 'pubyear'
+  month: 'pubmonth'
+  day: 'pubday'
+  season: 'season'
+  quarter: 'quarter'
+  volume: 'volume'
+  issue: 'issue'
+  article_number: 'artnum'
+  enumeration: 'chron'
+  part: 'part'
+  edition: 'ed'
+  institute: 'inst'
+  series: 'series'
+  start_page: 'spage'
+  end_page: 'epage'
+  pages: 'pages'
+  name: 'au'
+  corporate_author: 'aucorp'
+  full_name: 'au'
+  last_name: 'aulast'
+  first_name: 'aufirst'
+  suffix: 'ausuffix'
+  middle_initial: 'auinitm'
+  first_initial: 'auinit1'
+  initials: 'auinit'
+
+openurl_1_0:
+  genre: 'rft.genre'
+  ip: 'req.ip'
+  issn: ['rft_id', 'urn:ISSN:?']
+  eissn: ['rft_id', 'urn:ISSN:?']
+  isbn: ['rft_id', 'urn:ISBN:?']
+  eisbn: ['rft_id', 'urn:ISBN:?']
+  oclc: ['rft_id', 'info:oclcnum/?']
+  lccn: ['rft_id', 'info:lccn/?']
+  doi: ['rft_id', 'info:doi/?']
+  pmid: ['rft_id', 'info:pmid/?']
+  coden: ['rft_id', 'info:coden/?']
+  sici: ['rft_id', 'info:sici/?']
+  bici: ['rft_id', 'info:bici/?']
+  bibcode: ['rft_id', 'info:bibcode/?']
+  hdl: ['rft_id', 'info:hdl/?']
+  oai: ['rft_id', 'info:oai/?']
+  nbn: ['rft_id', 'info:nbn/?']
+  title: 'rft.title'
+  article_title: 'rft.atitle'
+  journal_title: 'rft.jtitle'
+  chapter_title: 'rft.atitle'
+  book_title: 'rft.btitle'
+  publisher: 'rft.pub'
+  publication_date: 'rft.date'
+  publication_place: 'rft.place'
+  date: 'rft.date'
+  year: 'rft.pubyear'
+  month: 'rft.pubmonth'
+  day: 'rft.pubday'
+  season: 'rft.season'
+  quarter: 'rft.quarter'
+  volume: 'rft.volume'
+  issue: 'rft.issue'
+  article_number: 'rft.artnum'
+  enumeration: 'rft.chron'
+  part: 'rft.part'
+  edition: 'rft.ed'
+  institute: 'rft.inst'
+  series: 'rft.series'
+  start_page: 'rft.spage'
+  end_page: 'rft.epage'
+  pages: 'rft.pages'
+  name: 'rft.au'
+  corporate_author: 'rft.aucorp'
+  full_name: 'rft.au'
+  last_name: 'rft.aulast'
+  first_name: 'rft.aufirst'
+  suffix: 'rft.ausuffix'
+  middle_initial: 'rft.auinitm'
+  first_initial: 'rft.auinit1'
+  initials: 'rft.auinit'

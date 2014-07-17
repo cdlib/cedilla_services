@@ -1,7 +1,8 @@
 require 'nokogiri'
 require 'cedilla/author'
+require 'cedilla/service'
 
-class SfxService < CedillaService
+class SfxService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -27,7 +28,7 @@ class SfxService < CedillaService
     target += '&' unless target[-1] == '&' or target[-1] == '?'
 
     target += URI.escape("rfr_id=info:sid/#{@config['sid_identifier'] || 'CEDILLA'}")
-    target += "&#{citation.original_citation}"
+    target += "&#{@request.original_request}"
 
     ver = (target.include?('Z39.88-2004') || target.include?('rft.')) ? '1_0' : '0_1'
     
@@ -64,12 +65,12 @@ puts "calling: #{target}"
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
-  def process_response(status, headers, body)
+  def process_response()
     
     LOGGER.debug "Response from SFX:"
-    LOGGER.debug "Headers: #{headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    LOGGER.debug "Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
     LOGGER.debug "Body:"
-    LOGGER.debug body
+    LOGGER.debug @response_body
     
     begin
       doc = Nokogiri::XML(@response_body)
