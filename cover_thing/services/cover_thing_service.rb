@@ -1,9 +1,11 @@
+require 'cedilla/service'
+
 # -------------------------------------------------------------------------
 # An Implementation of the CedillaService Gem
 #
 # Would likely sit in another file within the project
 # -------------------------------------------------------------------------
-class CoverThingService < CedillaService
+class CoverThingService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -33,9 +35,9 @@ class CoverThingService < CedillaService
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
-  def process_response(status, headers, body)
+  def process_response
     # If a content length of 43 was returned then we got the default Not-Found page!
-    if headers['content_length'] == '43'
+    if @response_headers['content-length'] == '43' or @response_headers['content-length'].nil?
       return Cedilla::Citation.new({}) 
     else
       return Cedilla::Citation.new({:sample_cover_image => @ct_target}) 
