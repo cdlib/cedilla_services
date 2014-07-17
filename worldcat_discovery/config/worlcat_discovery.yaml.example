@@ -1,12 +1,25 @@
 max_attempts: 1
 
-target: 'https://beta.worldcat.org/discovery/bib/search'
+target: 'https://beta.worldcat.org/discovery/bib'
 
-query_string: 
-  - key: 'your key'
-  - secret: 'your secret'
+minimum_api_version: 1.1
 
 http_method: 'get'
 http_timeout: 5
 http_error_on_non_200: true
 http_max_redirects: 5
+
+auth_target: 'https://worldcat.org/bib/data/823520553?classificationScheme=LibraryOfCongress&holdingLibraryCode=MAIN'
+auth_key: 'KEY'
+auth_secret: 'SECRET'
+
+rdf_uri:
+  SAME_AS: 'http://www.w3.org/2002/07/owl#sameAs'
+  SCHEMA_AUTHOR: 'http://schema.org/author'
+  SCHEMA_COUNTRY: 'http://schema.org/Country'
+  LC_COUNTRY: 'http://id.loc.gov/vocabulary/countries'
+  DBPEDIA_AUTHOR: 'http://dbpedia.org/ontology/author'
+  DBPEDIA_WEBSITE: 'http://dbpedia.org/property/website'
+  RDFS_LABEL: 'http://www.w3.org/2000/01/rdf-schema#label'
+  RDFS_COMMENT: 'http://www.w3.org/2000/01/rdf-schema#comment'
+  FOAF_TOPIC: 'http://xmlns.com/foaf/0.1/isPrimaryTopicOf'

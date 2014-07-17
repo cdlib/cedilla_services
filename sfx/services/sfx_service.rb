@@ -188,8 +188,6 @@ end
       raise Cedilla::Error.new('fatal', 'Unable to process the XML response from SFX!')
     end
     
-    puts citation.inspect
-    
     citation
     
   end

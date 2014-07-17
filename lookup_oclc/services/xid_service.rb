@@ -1,6 +1,7 @@
+require 'cedilla/service'
 require 'cedilla/author'
 
-class XidService < CedillaService
+class XidService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -36,11 +37,11 @@ class XidService < CedillaService
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
-  def process_response(status, headers, body)
+  def process_response
     attributes = {}
     auths = []
     
-    json = JSON.parse(body)
+    json = JSON.parse(@response_body)
   
     unless json['stat'].nil?
       if json['stat'] == 'ok'
@@ -80,8 +81,6 @@ class XidService < CedillaService
         
       end
     end
-    
-    puts attributes
     
     Cedilla::Citation.new(attributes)
     

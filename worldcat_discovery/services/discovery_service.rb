@@ -1,10 +1,11 @@
 require 'oclc/auth'
 require 'worldcat/discovery'
 
+require 'cedilla/service'
 require 'cedilla/author'
 require 'cedilla/resource'
 
-class DiscoveryService < CedillaService
+class DiscoveryService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -33,25 +34,25 @@ class DiscoveryService < CedillaService
   end
 
   # -------------------------------------------------------------------------
-  def process_request(citation, headers)
+  def process_request(request, headers)
     ret = {'citations' => []}
     @graph = RDF::Graph.new
     
-    if !citation.oclc.nil?
+    if !request.citation.oclc.nil?
       # We have a specific item id
-      bib = WorldCat::Discovery::Bib.find(citation.oclc)
+      bib = WorldCat::Discovery::Bib.find(request.citation.oclc)
       
       ret['citations'] << build_citation(bib) unless bib.nil?
       
     else
       # We don't have an item id so do a search
-      params = {:q => (citation.book_title.nil? ? 
-                         citation.journal_title.nil? ? 
-                           citation.article_title.nil? ? citation.title : citation.article_title : 
-                         citation.journal_title : 
-                       citation.book_title)}
+      params = {:q => (request.citation.book_title.nil? ? 
+                       request.citation.journal_title.nil? ? 
+                       request.citation.article_title.nil? ? request.citation.title : request.citation.article_title : 
+                       request.citation.journal_title : 
+                       request.citation.book_title)}
                        
-      params[:au] = citation.authors.first.last_name unless citation.authors.size <= 0
+      params[:au] = request.citation.authors.first.last_name unless request.citation.authors.size <= 0
       params[:facets] = ['author:10', 'inLanguage:10']
       params[:startNum] = 0
       
@@ -62,8 +63,8 @@ class DiscoveryService < CedillaService
         
         ret['citations'].each do |citation|
           # If the new citation matches one we've already processed just combine the values onto the existing citation
-          if citation == new_citation
-            citation.combine(new_citation)
+          if request.citation == new_citation
+            request.citation.combine(new_citation)
             new_citation = nil
           end
         end
@@ -72,18 +73,22 @@ class DiscoveryService < CedillaService
       end
     end
   
-    process_response(200, {}, ret)
+    @response_status = 200
+    @response_headers = {}
+    @response_body = ret
+    
+    process_response
   end
   
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
-  def process_response(status, headers, body)
-    LOGGER.debug "response status: #{status}"
-    LOGGER.debug "response headers: #{headers.collect{ |k,v| "#{k}=#{v}" }.join(', ')}"
-    LOGGER.debug "response body: #{body}"
+  def process_response
+    LOGGER.debug "response status: #{@response_status}"
+    LOGGER.debug "response headers: #{@response_headers.collect{ |k,v| "#{k}=#{v}" }.join(', ')}"
+    LOGGER.debug "response body: #{@response_body}"
   
-    body
+    @response_body
   end
   
 private
@@ -113,6 +118,12 @@ private
     resource['oclc_lod'] = bib.work_uri unless bib.work_uri.nil?
     resource['reviews'] = bib.reviews.collect{ |rev| "#{rev.id}" } unless bib.reviews.nil?
     resource['rating'] = bib.display_position || 1
+    
+puts 'Citation: -------------------------------'
+puts citation
+puts 'Author: -------------------------------'
+puts author
+
     
     ret = Cedilla::Citation.new(citation)
     ret.authors << Cedilla::Author.new(author) if author.size > 0
