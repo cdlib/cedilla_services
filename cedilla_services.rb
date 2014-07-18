@@ -1,5 +1,4 @@
-require('./services/sfx.rb')
-require('./services/worldcat_discovery.rb')
+Dir[File.dirname(__FILE__) + "/services/*.rb"].each{ |file| puts file; require file }
 
 class CedillaServices < Sinatra::Application
   
@@ -8,7 +7,7 @@ class CedillaServices < Sinatra::Application
     "Cedilla Delivery Aggregator Wiki</a>"
   
   # -------------------------------------------------------------------------
-  get '/sfx'{ default_msg.sub('?', 'ExLibris SFX') }
+  get '/sfx' do default_msg.sub('?', 'ExLibris SFX') end
   # -------------------------------------------------------------------------
   post '/sfx' do
     cedilla = CedillaController.new
@@ -19,7 +18,7 @@ class CedillaServices < Sinatra::Application
   end
   
   # -------------------------------------------------------------------------
-  get '/worldcat_discovery'{ default_msg.sub('?', 'Worldcat Discovery') }
+  get '/worldcat_discovery' do default_msg.sub('?', 'Worldcat Discovery') end
   # -------------------------------------------------------------------------
   post '/worldcat_discovery' do
     cedilla = CedillaController.new
@@ -30,7 +29,7 @@ class CedillaServices < Sinatra::Application
   end
   
   # -------------------------------------------------------------------------
-  get '/xid' { default_msg.sub('?', 'OCLC Xid') }
+  get '/xid' do default_msg.sub('?', 'OCLC Xid') end
   # -------------------------------------------------------------------------
   post '/xid' do
     cedilla = CedillaController.new  
@@ -41,7 +40,7 @@ class CedillaServices < Sinatra::Application
   end
   
   # -------------------------------------------------------------------------
-  get '/internet_archive'{ default_msg.sub('?', 'Internet Archive') }
+  get '/internet_archive' do default_msg.sub('?', 'Internet Archive') end
   # -------------------------------------------------------------------------
   post '/internet_archive' do
     cedilla = CedillaController.new
@@ -52,7 +51,7 @@ class CedillaServices < Sinatra::Application
   end
   
   # -------------------------------------------------------------------------
-  get '/cover_thing'{ default_msg.sub('?', 'CoverThing') }
+  get '/cover_thing' do default_msg.sub('?', 'CoverThing') end
   # -------------------------------------------------------------------------
   post '/cover_thing' do
     cedilla = CedillaController.new

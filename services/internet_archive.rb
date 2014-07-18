@@ -26,14 +26,15 @@ class InternetArchiveService < Cedilla::Service
   
   # -------------------------------------------------------------------------
   def validate_citation(citation)
+    ret = false
     # If the citation has an identifier OR it has a title for its respective genre then its valid
     if citation.is_a?(Cedilla::Citation)
-      return (['book', 'bookitem'].include?(citation.genre) and (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil?)) or
+      ret = (['book', 'bookitem'].include?(citation.genre) and (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil?)) or
               (['journal', 'issue', 'series'].include?(citation.genre) and (!citation.title.nil? or !citation.journal_title.nil?)) or
               (['article', 'report', 'paper', 'dissertation'].include?(citation.genre) and (!citation.title.nil? or !citation.article_title.nil?))
-    else
-      return false
     end
+    
+    ret
   end
   
   # -------------------------------------------------------------------------
