@@ -21,7 +21,18 @@ class SfxService < Cedilla::Service
   end
   
   # -------------------------------------------------------------------------
-  # 
+  def validate_citation(citation)
+    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    if citation.is_a?(Cedilla::Citation)
+      return citation.has_identifier? or 
+          (['book', 'bookitem'].include?(citation.genre) and (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil?)) or
+          (['journal', 'issue', 'series'].include?(citation.genre) and (!citation.title.nil? or !citation.journal_title.nil?)) or
+          (['article'].include?(citation.genre) and (!citation.title.nil? or !citation.article_title.nil?))  
+    else
+      return false
+    end
+  end
+  
   # -------------------------------------------------------------------------
   def add_citation_to_target(citation)
     target = "#{build_target}"
@@ -56,7 +67,7 @@ class SfxService < Cedilla::Service
       end #unless target.include?
     end
 
-puts "calling: #{target}"
+    LOGGER.debug "calling: #{target}"
 
     target
   end

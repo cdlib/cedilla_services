@@ -147,8 +147,6 @@ private
           end
       
         else
-          puts "looking for ip: #{ip} in #{campus}"
-          
           # Check the IP Ranges
           campus.xpath(@config['xpath_ip_range_element']).each do |range|
             if ip.to_s >= range.xpath(@config['xpath_ip_range_start']).to_s and ip.to_s <= range.xpath(@config['xpath_ip_range_end']).to_s
@@ -175,12 +173,25 @@ private
 
   # -------------------------------------------------------------------------
   def download_data
+    response = nil
     target = @config['target']
     
     # Call the target
     begin  
       unless target.nil? or target.strip == ''
-        response = call_target(Cedilla::Citation.new, target, {}, 0)
+        url = URI.parse(target)
+    
+        headers = {} 
+        
+        http = Net::HTTP.new(url.host, url.port)
+        http.use_ssl = true if url.scheme == 'https'
+    
+        response = http.start do |http|
+          http.open_timeout = @http_timeout
+          http.read_timeout = @http_timeout
+      
+          http.get(url.request_uri, headers) 
+        end
       end
     
     rescue => e
@@ -202,4 +213,5 @@ private
     end
     
   end
+  
 end

@@ -25,6 +25,18 @@ class InternetArchiveService < Cedilla::Service
   end
   
   # -------------------------------------------------------------------------
+  def validate_citation(citation)
+    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    if citation.is_a?(Cedilla::Citation)
+      return (['book', 'bookitem'].include?(citation.genre) and (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil?)) or
+              (['journal', 'issue', 'series'].include?(citation.genre) and (!citation.title.nil? or !citation.journal_title.nil?)) or
+              (['article', 'report', 'paper', 'dissertation'].include?(citation.genre) and (!citation.title.nil? or !citation.article_title.nil?))
+    else
+      return false
+    end
+  end
+  
+  # -------------------------------------------------------------------------
   def process_response
     new_citation = Cedilla::Citation.new
     
@@ -75,9 +87,6 @@ class InternetArchiveService < Cedilla::Service
 
 # -----------------------------------------------------------------------------
   def add_citation_to_target(citation)
-    
-    puts citation.inspect
-    
     target = "#{build_target}"
 
     title = citation.book_title.nil? ? URI.escape(citation.title) : URI.escape(citation.book_title)

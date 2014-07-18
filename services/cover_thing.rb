@@ -24,6 +24,16 @@ class CoverThingService < Cedilla::Service
   end
   
   # -------------------------------------------------------------------------
+  def validate_citation(citation)
+    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    if citation.is_a?(Cedilla::Citation)
+      return (!citation.isbn.nil? or !citation.eisbn.nil?)
+    else
+      return false
+    end
+  end
+  
+  # -------------------------------------------------------------------------
   # All CoverThing cares about is the ISBN, so overriding the base class
   # -------------------------------------------------------------------------
   def add_citation_to_target(citation)

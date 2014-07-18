@@ -1,7 +1,7 @@
 require 'cedilla/service'
 require 'cedilla/author'
 
-class XidService < Cedilla::Service
+class OclcXidService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -17,6 +17,16 @@ class XidService < Cedilla::Service
       $stdout.puts "Unable to load configuration file!"
     end
     
+  end
+  
+  # -------------------------------------------------------------------------
+  def validate_citation(citation)
+    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    if citation.is_a?(Cedilla::Citation)
+      return (!citation.isbn.nil? or !citation.eisbn.nil? or !citation.issn.nil? or !citation.eissn.nil?)
+    else
+      return false
+    end
   end
   
   # -------------------------------------------------------------------------

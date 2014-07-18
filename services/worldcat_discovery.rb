@@ -5,7 +5,7 @@ require 'cedilla/service'
 require 'cedilla/author'
 require 'cedilla/resource'
 
-class DiscoveryService < Cedilla::Service
+class WorldcatDiscoveryService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   # All implementations of CedillaService should load their own config and pass
@@ -31,6 +31,19 @@ class DiscoveryService < Cedilla::Service
       $stdout.puts e.backtrace
     end
     
+  end
+  
+  # -------------------------------------------------------------------------
+  def validate_citation(citation)
+    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    if citation.is_a?(Cedilla::Citation)
+      return (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil? or
+              !citation.journal_title.nil? or !citation.article_title.nil? or !citation.isbn.nil? or
+              !citation.eisbn.nil? or !citation.issn.nil? or !citation.eissn.nil? or 
+              !citation.oclc.nil? or !citation.lccn.nil?)
+    else
+      return false
+    end
   end
 
   # -------------------------------------------------------------------------
@@ -118,12 +131,6 @@ private
     resource['oclc_lod'] = bib.work_uri unless bib.work_uri.nil?
     resource['reviews'] = bib.reviews.collect{ |rev| "#{rev.id}" } unless bib.reviews.nil?
     resource['rating'] = bib.display_position || 1
-    
-puts 'Citation: -------------------------------'
-puts citation
-puts 'Author: -------------------------------'
-puts author
-
     
     ret = Cedilla::Citation.new(citation)
     ret.authors << Cedilla::Author.new(author) if author.size > 0

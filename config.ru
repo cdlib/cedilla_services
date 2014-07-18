@@ -2,11 +2,16 @@ require 'rubygems'
 require 'bundler'
 require 'sinatra'
 require 'yaml'
+
+require 'rdf/turtle'
+require 'rdf/rdfxml'
+require 'rest_client'
+
 require 'cedilla'
-require('./sfx.rb')
+require('./cedilla_services.rb')
 
 configure do
-  LOGGER = Logger.new("sfx.log")
+  LOGGER = Logger.new("cedilla_services.log")
   enable :logging, :dump_errors
   set :raise_errors, true
   
@@ -15,4 +20,4 @@ configure do
 end
 
 # -------------------------------------------------------------------------
-run Sfx.new
+run CedillaServices.new
