@@ -41,6 +41,7 @@ class SfxService < Cedilla::Service
     target += '&' unless target[-1] == '&' or target[-1] == '?'
 
     target += URI.escape("rfr_id=info:sid/#{@config['sid_identifier'] || 'CEDILLA'}")
+    target += "&#{@config['campus_affiliation_parameter']}=#{@request.requestor_ip}" unless @request.requestor_ip.nil?
     target += "&#{@request.original_request}"
 
     ver = (target.include?('Z39.88-2004') || target.include?('rft.')) ? '1_0' : '0_1'
@@ -71,9 +72,10 @@ class SfxService < Cedilla::Service
 
     LOGGER.debug "calling: #{target}"
 
+puts "calling: #{target}"
+
     target
   end
-  
   
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!

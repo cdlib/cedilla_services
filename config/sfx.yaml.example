@@ -12,6 +12,7 @@ http_error_on_non_200: true
 http_max_redirects: 5
 
 sid_identifier: 'ORG:CEDILLA'
+campus_affiliation_parameter: 'req.ip'
 
 openurl_0_1:
   genre: 'genre'
