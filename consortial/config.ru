@@ -3,7 +3,7 @@ require 'bundler'
 require 'sinatra'
 require 'yaml'
 require 'cedilla'
-require('./consortial.rb')
+require_relative './consortial.rb'
 
 configure do
   LOGGER = Logger.new("consortial.log")

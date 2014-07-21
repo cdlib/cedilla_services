@@ -9,7 +9,9 @@ Each service is meant to run on its own webserver listening to the port you spec
 - Ruby >= 2.0
 - Rubygems
 - Sinatra (rack, rake, thin)
-- Cedilla 
+- OCLC Authentication Gem (submodule of this project)
+- Worldcat Discovery Gem (submodule of this project)
+- Cedilla: https://github.com/cdlib/cedilla
 
 ### Installation
 
@@ -18,16 +20,36 @@ Each service is meant to run on its own webserver listening to the port you spec
 > git clone https://github.com/cdlib/cedilla_services
 ```
 
+- Build the Submodule Gems
+```
+> cd cedilla_services
+> git submodule init
+> git submodule update
+> cd vendor/oclc-auth-ruby
+> gem build oclc-auth.gemspec
+> gem install oclc-auth-ruby
+> cd ../worldcat-discovery-ruby
+> gem build worldcat-discovery.gemspec
+> gem install worldcat-discovery
+> cd ../..
+```
+
 - Move the example yaml files to a separate directory on your machine outside of the repository (for example cedilla_services_local).
 - Rename each of the configuration files to .yaml (e.g. cover_thing.yaml.example -> cover_thing.yaml). 
 - Update the configuration files as necessary (e.g. enter your developer key into the 'target' property for cover_thing.yaml)
 
-- Start the service(s)
+- Start the Service(s)
 ```
-> cd [directory]
-> cd config
+> cd cedilla_services/config
 > ln -s [/path/to/your/local/yaml/files/file.yaml] [file.yaml]
 > cd ..
+> bundle install
+> rackup config.ru -p [port]
+```
+
+- Start the Consortial Service (optional)
+```
+> cd consortial
 > bundle install
 > rackup config.ru -p [port]
 ```
