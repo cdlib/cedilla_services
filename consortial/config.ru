@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler'
 require 'sinatra'
+require 'sinatra/base'
 require 'yaml'
 require 'cedilla'
 require './consortial.rb'
