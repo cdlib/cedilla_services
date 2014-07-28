@@ -41,6 +41,11 @@ class InternetArchiveService < Cedilla::Service
   def process_response
     new_citation = Cedilla::Citation.new
     
+    LOGGER.debug "INTERNET ARCHIVE - Response from target:"
+    LOGGER.debug "INTERNET ARCHIVE - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    LOGGER.debug "INTERNET ARCHIVE - Body:"
+    LOGGER.debug @response_body
+    
     begin
       doc = MultiJson.load(@response_body)
       results = doc['response']['docs']
@@ -78,7 +83,7 @@ class InternetArchiveService < Cedilla::Service
         
       end # results.each
     rescue Exception => e
-      LOGGER.error e.message
+      LOGGER.error "INTERNET ARCHIVE - Error: #{e.message}"
       LOGGER.error e.backtrace
     end
     

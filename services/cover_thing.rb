@@ -46,6 +46,12 @@ class CoverThingService < Cedilla::Service
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
   def process_response
+    
+    LOGGER.debug "COVER THING - Response from target:"
+    LOGGER.debug "COVER THING - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    LOGGER.debug "COVER THING - Body:"
+    LOGGER.debug @response_body
+    
     # If a content length of 43 was returned then we got the default Not-Found page!
     if @response_headers['content-length'] == '43' or @response_headers['content-length'].nil?
       return Cedilla::Citation.new({}) 

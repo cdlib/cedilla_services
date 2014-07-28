@@ -97,9 +97,10 @@ class WorldcatDiscoveryService < Cedilla::Service
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
   def process_response
-    LOGGER.debug "response status: #{@response_status}"
-    LOGGER.debug "response headers: #{@response_headers.collect{ |k,v| "#{k}=#{v}" }.join(', ')}"
-    LOGGER.debug "response body: #{@response_body}"
+    LOGGER.debug "WORLDCAT DISCOVERY - Response from target:"
+    LOGGER.debug "WORLDCAT DISCOVERY - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    LOGGER.debug "WORLDCAT DISCOVERY - Body:"
+    LOGGER.debug @response_body
   
     @response_body
   end
@@ -137,6 +138,7 @@ private
     ret.resources << Cedilla::Resource.new(resource) if resource.size > 0
 
 =begin    
+    # Future dev: use RDF connections to extract data from external resources like VIAAF
     load_rdf(bib.id.to_s)
     
     author_uri = @graph.query(:subject => bib.id, :predicate => RDF::URI.new('http://schema.org/author')).first.object

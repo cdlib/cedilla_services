@@ -51,6 +51,11 @@ class OclcXidService < Cedilla::Service
     attributes = {}
     auths = []
     
+    LOGGER.debug "OCLC XID - Response from target:"
+    LOGGER.debug "OCLC XID - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    LOGGER.debug "OCLC XID - Body:"
+    LOGGER.debug @response_body
+    
     json = JSON.parse(@response_body)
   
     unless json['stat'].nil?

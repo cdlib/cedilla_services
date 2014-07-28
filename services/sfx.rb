@@ -70,9 +70,7 @@ class SfxService < Cedilla::Service
       end #unless target.include?
     end
 
-    LOGGER.debug "calling: #{target}"
-
-puts "calling: #{target}"
+    LOGGER.debug "SFX - calling: #{target}"
 
     target
   end
@@ -82,9 +80,9 @@ puts "calling: #{target}"
   # -------------------------------------------------------------------------
   def process_response()
     
-    LOGGER.debug "Response from SFX:"
-    LOGGER.debug "Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
-    LOGGER.debug "Body:"
+    LOGGER.debug "SFX - Response from target:"
+    LOGGER.debug "SFX - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    LOGGER.debug "SFX - Body:"
     LOGGER.debug @response_body
     
     begin
@@ -93,8 +91,6 @@ puts "calling: #{target}"
       citation = Cedilla::Citation.new
     
       doc.xpath("//ctx_obj_set//ctx_obj_targets//target").each do |target|
-      #doc.xpath("//sfx_menu//targets//target").each do |target|
-
         params = {}
 
         # Figure out what the service type is
@@ -172,32 +168,12 @@ puts "calling: #{target}"
       
         resource = Cedilla::Resource.new(params) unless params.empty?
 
-=begin                 
-      # If the broker callback was registered and the resource is electronic
-      if !resource.nil? and resource.format = 'electronic' and !@caller.nil?
-        # Generate a Screen Scraper service to parse the target
-        service = Cedilla::ServiceFactory.instance.create('scraper')
-        service.target = resource.target.nil? ? resource.catalog_target : resource.target
-        
-        @logger.log(:info, "...... deferring call to the target: #{service.target}")
-        
-        
-unless service.target.index('proquest').nil?
-        # Have the broker dispatch the screen scraper service in this item's place
-        caller.queue_new_service(service) unless service.target.nil?
-end
-        
-      else
-        # Otherwise add the resource to the citation
-        citation.resources << resource unless citation.has_resource?(resource) or resource.nil?
-      end
-=end
         citation.resources << resource unless citation.has_resource?(resource) or resource.nil?
       
       end
     
     rescue Exception => e
-      LOGGER.error(e.message)
+      LOGGER.error("SFX - error: #{e.message}")
       LOGGER.error(e.backtrace)
       
       raise Cedilla::Error.new('fatal', 'Unable to process the XML response from SFX!')
