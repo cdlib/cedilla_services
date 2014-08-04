@@ -6,23 +6,7 @@ require 'cedilla/service'
 # Would likely sit in another file within the project
 # -------------------------------------------------------------------------
 class CoverThingService < Cedilla::Service
-
-  # -------------------------------------------------------------------------
-  # All implementations of CedillaService should load their own config and pass
-  # it along to the base class
-  # -------------------------------------------------------------------------
-#  def initialize(defs)
-#    begin
-#      config = YAML.load_file('./config/cover_thing.yaml')
-    
-#      super(config)
-      
-#    rescue Exception => e
-#      $stdout.puts "Unable to load configuration file!"
-#    end
-    
-#  end
-  
+ 
   # -------------------------------------------------------------------------
   def validate_citation(citation)
     # If the citation has an identifier OR it has a title for its respective genre then its valid
@@ -37,16 +21,21 @@ class CoverThingService < Cedilla::Service
   # All CoverThing cares about is the ISBN, so overriding the base class
   # -------------------------------------------------------------------------
   def add_citation_to_target(citation)
-    isbn = citation.isbn.nil? ? citation.eisbn : citation.isbn
-    @ct_target = "#{build_target}#{isbn.gsub(/[^\d]/, '')}"
+    isbn = citation.isbn.nil? ? citation.eisbn : citation.isbn 
+    
+    unless isbn.nil?
+      @ct_target = "#{build_target}#{isbn.gsub(/[^\d]/, '')}"
+    
+      LOGGER.debug "COVER THING - Target after add_citation_to_target: #{@ct_target}"
+    end
+    
     @ct_target
   end
   
   # -------------------------------------------------------------------------
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
-  def process_response
-    
+  def process_response    
     LOGGER.debug "COVER THING - Response from target:"
     LOGGER.debug "COVER THING - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
     LOGGER.debug "COVER THING - Body:"
