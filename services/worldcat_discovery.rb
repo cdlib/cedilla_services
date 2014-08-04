@@ -11,18 +11,11 @@ class WorldcatDiscoveryService < Cedilla::Service
   # All implementations of CedillaService should load their own config and pass
   # it along to the base class
   # -------------------------------------------------------------------------
-  def initialize
-    begin
-      @config = YAML.load_file('./config/worldcat_discovery.yaml')
-    
-      super(@config)
-    
-    rescue Exception => e
-      $stdout.puts "ERROR: Unable to load configuration file!"
-    end
-    
+  def initialize(config)    
+    super(config)
+
     begin  
-      #@auth_target = @config['auth_target']
+      # Setup the authentication WSKey for OCLC
       wskey = OCLC::Auth::WSKey.new(@config['auth_key'], @config['auth_secret'])
       WorldCat::Discovery.configure(wskey)
       

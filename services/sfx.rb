@@ -5,22 +5,6 @@ require 'cedilla/service'
 class SfxService < Cedilla::Service
 
   # -------------------------------------------------------------------------
-  # All implementations of CedillaService should load their own config and pass
-  # it along to the base class
-  # -------------------------------------------------------------------------
-  def initialize
-    begin
-      @config = YAML.load_file('./config/sfx.yaml')
-    
-      super(@config)
-      
-    rescue Exception => e
-      $stdout.puts "Unable to load configuration file!"
-    end
-    
-  end
-  
-  # -------------------------------------------------------------------------
   def validate_citation(citation)
     ret = false
     

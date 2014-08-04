@@ -7,17 +7,17 @@ class OclcXidService < Cedilla::Service
   # All implementations of CedillaService should load their own config and pass
   # it along to the base class
   # -------------------------------------------------------------------------
-  def initialize
-    begin
-      @config = YAML.load_file('./config/lookup_oclc.yml')
+#  def initialize
+#    begin
+#      @config = YAML.load_file('./config/lookup_oclc.yml')
     
-      super(@config)
+#      super(@config)
       
-    rescue Exception => e
-      $stdout.puts "Unable to load configuration file!"
-    end
+#    rescue Exception => e
+#      $stdout.puts "Unable to load configuration file!"
+#    end
     
-  end
+#  end
   
   # -------------------------------------------------------------------------
   def validate_citation(citation)
@@ -55,50 +55,73 @@ class OclcXidService < Cedilla::Service
     LOGGER.debug "OCLC XID - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
     LOGGER.debug "OCLC XID - Body:"
     LOGGER.debug @response_body
-    
+
     json = JSON.parse(@response_body)
   
     unless json['stat'].nil?
       if json['stat'] == 'ok'
         
-        json['list'].each do |item|
-          item.each do |key,val|
-          
-            # Just take the first entry if there are multiples
-            val = val.first if val.is_a?(Array)
-          
-            if key == 'lang'
-              attributes['language'] = val
-          
-            elsif key == 'city'
-              attributes['publication_place'] = val
-            
-            elsif key == 'author'
-              auths << Cedilla::Author.from_abritrary_string(val.sub('by ', ''))
-              
-            elsif key.include?('isbn')
-              attributes['isbn'] = val
-              
-            elsif key.include?('issn')
-              attributes['issn'] = val
-              
-            elsif key.include?('oclc')
-              attributes['oclc'] = val
-              
-            else
-              attributes[key] = val unless key == 'url'
-            end
-          
+        if json['group'].nil?
+          # Item level found
+          json['list'].each do |item|
+            attributes = attributes.merge(handle_item(item))
           end
+          
+          attributes['authors'] = auths
+          
+        else
+          # Joural level found so process items in the group
+          json['group'].each do |group|
+            group['list'].each do |item|
+              attributes = attributes.merge(handle_item(item))
+            end
+          end
+          
         end
-        
-        attributes['authors'] = auths
         
       end
     end
     
+puts attributes
+    
     Cedilla::Citation.new(attributes)
     
+  end
+  
+private
+# -----------------------------------------------------------------
+  def handle_item(item)
+    attributes = {}
+    
+    item.each do |key,val|
+      # Just take the first entry if there are multiples
+      val = val.first if val.is_a?(Array)
+    
+      if key == 'lang'
+        attributes['language'] = val
+    
+      elsif key == 'city'
+        attributes['publication_place'] = val
+      
+      elsif key == 'author'
+        auths << Cedilla::Author.from_abritrary_string(val.sub('by ', ''))
+        
+      elsif key.include?('isbn')
+        attributes['isbn'] = val
+        
+      elsif key.include?('issn')
+        attributes['issn'] = val
+        
+      elsif key.include?('oclc')
+        attributes['oclc'] = val
+        
+      else
+        attributes[key] = val unless key == 'url'
+      end
+    
+    end
+   
+    attributes
   end
   
 end

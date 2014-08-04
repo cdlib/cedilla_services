@@ -12,17 +12,17 @@ class InternetArchiveService < Cedilla::Service
   # All implementations of CedillaService should load their own config and pass
   # it along to the base class
   # -------------------------------------------------------------------------
-  def initialize
-    begin
-      config = YAML.load_file('./config/internet_archive.yml')
+#  def initialize
+#    begin
+#      config = YAML.load_file('./config/internet_archive.yml')
     
-      super(config)
+#      super(config)
       
-    rescue Exception => e
-      $stdout.puts "Unable to load configuration file!"
-    end
+#    rescue Exception => e
+#      $stdout.puts "Unable to load configuration file!"
+#    end
     
-  end
+#  end
   
   # -------------------------------------------------------------------------
   def validate_citation(citation)

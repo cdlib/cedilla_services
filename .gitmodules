@@ -4,3 +4,6 @@
 [submodule "vendor/oclc-auth-ruby"]
 	path = vendor/oclc-auth-ruby
 	url = https://github.com/OCLC-Developer-Network/oclc-auth-ruby.git
+[submodule "vendor/cedilla_service_commons"]
+	path = vendor/cedilla_service_commons
+	url = https://github.com/cdlib/cedilla_service_commons.git
