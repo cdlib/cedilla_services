@@ -16,8 +16,9 @@ class WorldcatDiscoveryService < Cedilla::Service
 
     begin  
       # Setup the authentication WSKey for OCLC
-      wskey = OCLC::Auth::WSKey.new(@config['auth_key'], @config['auth_secret'])
-      WorldCat::Discovery.configure(wskey)
+      wskey = OCLC::Auth::WSKey.new(@config['auth_key'], @config['auth_secret'], :services => ['WorldCatDiscoveryAPI'])
+      
+      WorldCat::Discovery.configure(wskey, @config['auth_institution'], @config['auth_institution'])
       
     rescue Exception => e
       $stdout.puts "ERROR: Initializing Worldcat Discovery Objects - #{e.message}"
@@ -28,12 +29,13 @@ class WorldcatDiscoveryService < Cedilla::Service
   
   # -------------------------------------------------------------------------
   def validate_citation(citation)
-    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    # If the citation has an ISBN, ISSN, OCLC, or LCCN identifier OR an author and title
     if citation.is_a?(Cedilla::Citation)
-      return (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil? or
-              !citation.journal_title.nil? or !citation.article_title.nil? or !citation.isbn.nil? or
-              !citation.eisbn.nil? or !citation.issn.nil? or !citation.eissn.nil? or 
-              !citation.oclc.nil? or !citation.lccn.nil?)
+      return (!citation.isbn.nil? or !citation.eisbn.nil? or 
+              !citation.issn.nil? or !citation.eissn.nil? or 
+              !citation.oclc.nil? or !citation.lccn.nil? or
+              (!citation.authors.empty? and (!citation.title.nil? or !citation.book_title.nil? or
+                                             !citation.journal_title.nil? or !citation.article_title.nil?)))
     else
       return false
     end
@@ -53,9 +55,9 @@ class WorldcatDiscoveryService < Cedilla::Service
     else
       # We don't have an item id so do a search
       params = {:q => (request.citation.book_title.nil? ? 
-                       request.citation.journal_title.nil? ? 
-                       request.citation.article_title.nil? ? request.citation.title : request.citation.article_title : 
-                       request.citation.journal_title : 
+                       request.citation.article_title.nil? ? 
+                       request.citation.journal_title.nil? ? request.citation.title : request.citation.journal_title : 
+                       request.citation.article_title : 
                        request.citation.book_title)}
                        
       params[:au] = request.citation.authors.first.last_name unless request.citation.authors.size <= 0
@@ -92,8 +94,8 @@ class WorldcatDiscoveryService < Cedilla::Service
   def process_response
     LOGGER.debug "WORLDCAT DISCOVERY - Response from target:"
     LOGGER.debug "WORLDCAT DISCOVERY - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
-    LOGGER.debug "WORLDCAT DISCOVERY - Body:"
-    LOGGER.debug @response_body
+    LOGGER.debug "WORLDCAT DISCOVERY - Body: uncomment line!"
+    #LOGGER.debug @response_body
   
     @response_body
   end

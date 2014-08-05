@@ -13,7 +13,7 @@ class CoverThingTest < Minitest::Test
                                         :title => 'The Metamorphosis', 
                                         :isbn => '9781479157303',
                                         :extras => {'valid' => [true]},
-                                        :authors => [Cedilla::Author.from_abritrary_string('Kafka, Franz')]}),
+                                        :authors => [Cedilla::Author.from_arbitrary_string('Kafka, Franz')]}),
                                         
                   Cedilla::Citation.new({:genre => 'book', 
                                         :title => 'Franz Kafka: The Complete Stories', 
@@ -22,7 +22,7 @@ class CoverThingTest < Minitest::Test
                                         :language => 'English',
                                         :pages => '488 pages',
                                         :extras => {'valid' => [true]},
-                                        :authors => [Cedilla::Author.from_abritrary_string('Kafka, Franz')]}),
+                                        :authors => [Cedilla::Author.from_arbitrary_string('Kafka, Franz')]}),
                                         
                   Cedilla::Citation.new({:genre => 'article', 
                                         :title => 'Authority, Autonomy, and Choice: The Role of Consent in the Moral and Political Visions of Franz Kafka and Richard Posner', 
@@ -31,7 +31,7 @@ class CoverThingTest < Minitest::Test
                                         :start_page => '384',
                                         :end_page => '428',
                                         :extras => {'valid' => [false]},
-                                        :authors => [Cedilla::Author.from_abritrary_string('Robin West')]})]
+                                        :authors => [Cedilla::Author.from_arbitrary_string('Robin West')]})]
   end
   
   # -----------------------------------------------------------------------------------

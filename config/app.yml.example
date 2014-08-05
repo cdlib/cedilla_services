@@ -205,6 +205,7 @@ services:
     auth_target: 'https://worldcat.org/bib/data/823520553?classificationScheme=LibraryOfCongress&holdingLibraryCode=MAIN'
     auth_key: 'KEY'
     auth_secret: 'SECRET'
+    auth_institution: '12345'
 
     rdf_uri:
       SAME_AS: 'http://www.w3.org/2002/07/owl#sameAs'

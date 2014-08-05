@@ -10,10 +10,17 @@ class SfxService < Cedilla::Service
     
     # If the citation has an identifier OR it has a title for its respective genre then its valid
     if citation.is_a?(Cedilla::Citation)
-      ret = citation.has_identifier? or 
-          (['book', 'bookitem'].include?(citation.genre) and (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil?)) or
-          (['journal', 'issue', 'series'].include?(citation.genre) and (!citation.title.nil? or !citation.journal_title.nil?)) or
-          (['article'].include?(citation.genre) and (!citation.title.nil? or !citation.article_title.nil?))  
+      ret = citation.has_identifier? 
+      
+      if !ret and ['book', 'bookitem'].include?(citation.genre) 
+        ret = (!citation.authors.empty? and (!citation.title.nil? or !citation.book_title.nil?))
+
+      elsif !ret and ['journal', 'issue', 'series'].include?(citation.genre)
+        ret = (!citation.authors.empty? and (!citation.title.nil? or !citation.journal_title.nil?))
+        
+      elsif !ret and ['article', 'report', 'paper', 'dissertation'].include?(citation.genre)
+        ret = (!citation.authors.empty? and (!citation.title.nil? or !citation.article_title.nil?))
+      end
     end
     
     ret
@@ -67,13 +74,13 @@ class SfxService < Cedilla::Service
     LOGGER.debug "SFX - Response from target:"
     LOGGER.debug "SFX - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
     LOGGER.debug "SFX - Body:"
-    LOGGER.debug @response_body
+    #LOGGER.debug @response_body
     
     begin
       doc = Nokogiri::XML(@response_body)
     
-      citation = Cedilla::Citation.new
-    
+      citation = Cedilla::Citation.new({})
+  
       doc.xpath("//ctx_obj_set//ctx_obj_targets//target").each do |target|
         params = {}
 

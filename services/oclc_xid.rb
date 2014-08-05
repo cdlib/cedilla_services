@@ -4,24 +4,8 @@ require 'cedilla/author'
 class OclcXidService < Cedilla::Service
 
   # -------------------------------------------------------------------------
-  # All implementations of CedillaService should load their own config and pass
-  # it along to the base class
-  # -------------------------------------------------------------------------
-#  def initialize
-#    begin
-#      @config = YAML.load_file('./config/lookup_oclc.yml')
-    
-#      super(@config)
-      
-#    rescue Exception => e
-#      $stdout.puts "Unable to load configuration file!"
-#    end
-    
-#  end
-  
-  # -------------------------------------------------------------------------
   def validate_citation(citation)
-    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    # If the citation has an ISBN or ISSN
     if citation.is_a?(Cedilla::Citation)
       return (!citation.isbn.nil? or !citation.eisbn.nil? or !citation.issn.nil? or !citation.eissn.nil?)
     else
@@ -81,9 +65,7 @@ class OclcXidService < Cedilla::Service
         
       end
     end
-    
-puts attributes
-    
+
     Cedilla::Citation.new(attributes)
     
   end
@@ -92,6 +74,7 @@ private
 # -----------------------------------------------------------------
   def handle_item(item)
     attributes = {}
+    auths = []
     
     item.each do |key,val|
       # Just take the first entry if there are multiples
@@ -104,7 +87,7 @@ private
         attributes['publication_place'] = val
       
       elsif key == 'author'
-        auths << Cedilla::Author.from_abritrary_string(val.sub('by ', ''))
+        auths << Cedilla::Author.from_arbitrary_string(val.sub('by ', ''))
         
       elsif key.include?('isbn')
         attributes['isbn'] = val
@@ -120,6 +103,8 @@ private
       end
     
     end
+   
+    attributes['authors'] = auths unless auths.empty?
    
     attributes
   end

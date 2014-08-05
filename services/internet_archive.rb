@@ -9,29 +9,19 @@ require 'multi_json'
 class InternetArchiveService < Cedilla::Service
 
   # -------------------------------------------------------------------------
-  # All implementations of CedillaService should load their own config and pass
-  # it along to the base class
-  # -------------------------------------------------------------------------
-#  def initialize
-#    begin
-#      config = YAML.load_file('./config/internet_archive.yml')
-    
-#      super(config)
-      
-#    rescue Exception => e
-#      $stdout.puts "Unable to load configuration file!"
-#    end
-    
-#  end
-  
-  # -------------------------------------------------------------------------
   def validate_citation(citation)
     ret = false
-    # If the citation has an identifier OR it has a title for its respective genre then its valid
+    # If the citation has a title and an author
     if citation.is_a?(Cedilla::Citation)
-      ret = (['book', 'bookitem'].include?(citation.genre) and (!citation.title.nil? or !citation.book_title.nil? or !citation.chapter_title.nil?)) or
-              (['journal', 'issue', 'series'].include?(citation.genre) and (!citation.title.nil? or !citation.journal_title.nil?)) or
-              (['article', 'report', 'paper', 'dissertation'].include?(citation.genre) and (!citation.title.nil? or !citation.article_title.nil?))
+      if ['book', 'bookitem'].include?(citation.genre) 
+        ret = (!citation.authors.empty? and (!citation.title.nil? or !citation.book_title.nil?))
+
+      elsif !ret and ['journal', 'issue', 'series'].include?(citation.genre)
+        ret = (!citation.authors.empty? and (!citation.title.nil? or !citation.journal_title.nil?))
+        
+      elsif !ret and ['article', 'report', 'paper', 'dissertation'].include?(citation.genre)
+        ret = (!citation.authors.empty? and (!citation.title.nil? or !citation.article_title.nil?))
+      end
     end
     
     ret
@@ -39,7 +29,7 @@ class InternetArchiveService < Cedilla::Service
   
   # -------------------------------------------------------------------------
   def process_response
-    new_citation = Cedilla::Citation.new
+    new_citation = Cedilla::Citation.new({})
     
     LOGGER.debug "INTERNET ARCHIVE - Response from target:"
     LOGGER.debug "INTERNET ARCHIVE - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
@@ -78,7 +68,7 @@ class InternetArchiveService < Cedilla::Service
 
           # Add the author and resource to the default citation object if they were found in the result
           new_citation.resources << Cedilla::Resource.new(hash) unless hash.empty?
-          new_citation.authors << Cedilla::Author.from_abritrary_string(CGI.escapeHTML(result['creator'].to_s)) unless result['creator'].nil?          
+          new_citation.authors << Cedilla::Author.from_arbitrary_string(CGI.escapeHTML(result['creator'].to_s)) unless result['creator'].nil?          
         end 
         
       end # results.each
@@ -95,11 +85,11 @@ class InternetArchiveService < Cedilla::Service
   def add_citation_to_target(citation)
     target = "#{build_target}"
 
-    title = citation.book_title.nil? ? URI.escape(citation.title) : URI.escape(citation.book_title)
+    title = citation.book_title.nil? ? citation.title.nil? ? '' : citation.title : citation.book_title
     
-    author = URI.escape(citation.authors.first.last_name.chomp(','))
+    author = citation.authors.first.nil? ? '' : citation.authors.first.last_name.chomp(',')
 
-    target += "&#{@config['citation_uri'].sub('?', title).sub('?', author)}"
+    target += "&#{@config['citation_uri'].sub('?', URI.escape(title)).sub('?', URI.escape(author))}"
     
     target
   end
