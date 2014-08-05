@@ -14,6 +14,7 @@ class CedillaServices < Sinatra::Application
   if File.exists?(File.dirname(__FILE__) + '/config/app.yml')
     config = YAML.load_file('./config/app.yml')
   else
+    puts "Warning ./config/app.yml not found! Using ./config/app.yml.example instead."
     config = YAML.load_file('./config/app.yml.example')
   end
   
