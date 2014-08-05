@@ -10,6 +10,8 @@ before_install:
   - "cd ../cedilla_service_commons"
   - "gem build cedilla.gemspec"
   - "gem install cedilla"
+  - "cd ../.."
+  - "bundle install"
 
 rvm:
   - "2.1.2"
