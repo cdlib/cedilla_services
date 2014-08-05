@@ -24,7 +24,8 @@ Gemfile.lock
 
 .DS_Store
 
-/**/config/*.yaml
+/config/*.yml
+/config/*.yaml
 
 **/tmp
 **/log

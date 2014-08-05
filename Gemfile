@@ -4,7 +4,7 @@ gem 'rack'
 gem 'thin'
 gem 'sinatra'
 gem 'sinatra-contrib'
-gem 'nokogiri', "1.5.5"
+gem 'nokogiri', "1.6.3"
 gem 'rdf-rdfxml'
 gem 'rdf-turtle'
 gem 'rest-client'
