@@ -1,10 +1,7 @@
 language: ruby
 
 before_install: 
-  - "git submodule init"
-  - "git submodule update"
-  - "gem update --system"
-  - "cd /vendor/oclc-auth-ruby"
+  - "cd vendor/oclc-auth-ruby"
   - "gem build oclc-auth.gemspec"
   - "gem install oclc-auth"
   - "cd ../worldcat-discovery-ruby"
