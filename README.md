@@ -13,7 +13,6 @@ The individual services are implementations of the https://github.com/cdlib/cedi
 #### Dependencies
 
 - Ruby >= 2.0
-- Rubygems
 - Sinatra (rack, rake, thin)
 - OCLC Authentication Gem (submodule of this project)
 - Worldcat Discovery Gem (submodule of this project)
@@ -64,6 +63,7 @@ Skip this step if you've already installed that project seperately
 
 #### Start the services
 ```
+> bundle install
 > thin -R config.ru start -p [port]
 ```
 
