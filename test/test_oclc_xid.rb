@@ -7,7 +7,15 @@ LOGGER = Logger.new(STDOUT)
 class OclcXidTest < Minitest::Test
   
   def setup
-    @config = YAML.load_file('./config/app.yml')['services']['oclc_xid']
+    conf = nil
+    if File.exists?(File.dirname(__FILE__) + '/config/app.yml')
+      conf = YAML.load_file('./config/app.yml')
+    else
+      puts "Warning ./config/app.yml not found! Using ./config/app.yml.example instead."
+      conf = YAML.load_file('./config/app.yml.example')
+    end
+    
+    @config = conf['services']['oclc_xid']
     
     @citations = [Cedilla::Citation.new({:genre => 'book', 
                                         :title => 'The Metamorphosis', 

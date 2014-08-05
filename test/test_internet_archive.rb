@@ -7,7 +7,15 @@ LOGGER = Logger.new(STDOUT)
 class InternetArchiveTest < Minitest::Test
   
   def setup
-    @config = YAML.load_file('./config/app.yml')['services']['internet_archive']
+    conf = nil
+    if File.exists?(File.dirname(__FILE__) + '/config/app.yml')
+      conf = YAML.load_file('./config/app.yml')
+    else
+      puts "Warning ./config/app.yml not found! Using ./config/app.yml.example instead."
+      conf = YAML.load_file('./config/app.yml.example')
+    end
+    
+    @config = conf['services']['internet_archive']
     
     @citations = []
     
