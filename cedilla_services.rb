@@ -9,8 +9,14 @@ class CedillaServices < Sinatra::Application
     "<a href='https://github.com/cdlib/cedilla_delivery_aggregator/wiki/JSON-Data-Model:-Between-Aggregator-and-Services'>" +
     "Cedilla Delivery Aggregator Wiki</a>"
   
-  config = YAML.load_file('./config/app.yml')
-
+  config = nil
+  
+  if File.exists?(File.dirname(__FILE__) + '/config/app.yml')
+    config = YAML.load_file('./config/app.yml')
+  else
+    config = YAML.load_file('./config/app.yml.example')
+  end
+  
   cedilla  = CedillaController.new
   
   def CedillaServices.to_camel_case(val)
