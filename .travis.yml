@@ -2,12 +2,15 @@ language: ruby
 
 before_install: 
   - "cd vendor/oclc-auth-ruby"
+  - "git pull origin master"
   - "gem build oclc-auth.gemspec"
   - "gem install oclc-auth"
   - "cd ../worldcat-discovery-ruby"
+  - "git pull origin master"
   - "gem build worldcat-discovery.gemspec"
   - "gem install worldcat-discovery"
   - "cd ../cedilla_service_commons"
+  - "git pull origin master"
   - "gem build cedilla.gemspec"
   - "gem install cedilla"
   - "cd ../.."

@@ -2,7 +2,7 @@
 
 ## Overview
 
-[![Build Status](https://secure.travis-ci.org/cdlib/cedilla_service_commons.png?branch=master)](http://travis-ci.org/cdlib/cedilla_services)
+[![Build Status](https://secure.travis-ci.org/cdlib/cedilla_service.png?branch=master)](http://travis-ci.org/cdlib/cedilla_services)
 
 This project contains a collection of services that can be used to feed the Cedilla delivery aggregation system: https://github.com/cdlib/cedilla.
 
