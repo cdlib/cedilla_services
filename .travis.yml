@@ -2,16 +2,15 @@ language: ruby
 
 before_install: 
   - "cd vendor/oclc-auth-ruby"
-  - "gem build oclc-auth.gemspec"
-  - "gem install oclc-auth"
+  - "sudo gem build oclc-auth.gemspec"
+  - "sudo gem install oclc-auth"
   - "cd ../worldcat-discovery-ruby"
-  - "gem build worldcat-discovery.gemspec"
-  - "gem install worldcat-discovery"
+  - "sudo gem build worldcat-discovery.gemspec"
+  - "sudo gem install worldcat-discovery"
   - "cd ../cedilla_service_commons"
-  - "gem build cedilla.gemspec"
-  - "gem install cedilla"
+  - "sudo gem build cedilla.gemspec"
+  - "sudo gem install cedilla"
   - "cd ../.."
-  - "bundle install"
 
 rvm:
   - "2.1.2"
