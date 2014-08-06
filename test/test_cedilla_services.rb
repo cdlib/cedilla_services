@@ -21,8 +21,14 @@ class CedillaServicesTest < Minitest::Test
   
   # --------------------------------------------------------------------------------------------------
   def test_startup
-    yaml = YAML.load_file(Dir.pwd + '/config/app.yml')
-
+    yaml = nil
+    if File.exists?(File.dirname(__FILE__) + '/config/app.yml')
+      yaml = YAML.load_file('./config/app.yml')
+    else
+      puts "Warning ./config/app.yml not found! Using ./config/app.yml.example instead."
+      yaml = YAML.load_file('./config/app.yml.example')
+    end
+    
     yaml['services'].each do |service, defs|
       get "/#{service}"
       
