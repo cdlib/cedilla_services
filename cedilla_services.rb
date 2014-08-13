@@ -51,9 +51,14 @@ class CedillaServices < Sinatra::Application
           begin
             klass = Object.const_get("#{CedillaServices.to_camel_case(service)}Service")
 
+            LOGGER.debug "#{service.upcase} - Received request for: #{request.body.read}"
+
             resp = cedilla.handle_request(request, response, klass.new(defs))
       
+            LOGGER.debug "#{service.upcase} - Responded with #{resp.status}: #{resp.body}"
+      
             status resp.status
+            
             resp.body
             
           rescue Exception => e
