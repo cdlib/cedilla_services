@@ -5,12 +5,16 @@ class OclcXidService < Cedilla::Service
 
   # -------------------------------------------------------------------------
   def validate_citation(citation)
+    ret = false
+    
     # If the citation has an ISBN or ISSN
     if citation.is_a?(Cedilla::Citation)
-      return (!citation.isbn.nil? or !citation.eisbn.nil? or !citation.issn.nil? or !citation.eissn.nil?)
-    else
-      return false
+      ret = (!citation.isbn.nil? or !citation.eisbn.nil? or !citation.issn.nil? or !citation.eissn.nil?)
     end
+  
+    LOGGER.debug "OCLC XID - Checking validity of Citation (must have ISBN or ISSN) -> #{ret}"
+    
+    ret
   end
   
   # -------------------------------------------------------------------------
@@ -25,6 +29,8 @@ class OclcXidService < Cedilla::Service
       ret = ret.sub('{idType}', 'xisbn').sub('?', "isbn/#{citation.isbn.nil? ? citation.eisbn : citation.isbn}?")
     end
     
+    LOGGER.debug "OCLC XID - Calling #{ret}"
+    
     ret
   end
   
@@ -35,10 +41,10 @@ class OclcXidService < Cedilla::Service
     attributes = {}
     auths = []
     
-    LOGGER.debug "OCLC XID - Response from target:"
-    LOGGER.debug "OCLC XID - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
-    LOGGER.debug "OCLC XID - Body:"
-    LOGGER.debug @response_body
+    LOGGER.debug "OCLC XID - Response from target: #{@response_status}"
+    #LOGGER.debug "OCLC XID - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    #LOGGER.debug "OCLC XID - Body:"
+    #LOGGER.debug @response_body
 
     json = JSON.parse(@response_body)
   
