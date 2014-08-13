@@ -24,6 +24,8 @@ class InternetArchiveService < Cedilla::Service
       end
     end
     
+    LOGGER.debug "INTERNET ARCHIVE - Checking validity of Citation (must have Title and Author) -> #{ret}"
+    
     ret
   end
   
@@ -31,10 +33,10 @@ class InternetArchiveService < Cedilla::Service
   def process_response
     new_citation = Cedilla::Citation.new({})
     
-    LOGGER.debug "INTERNET ARCHIVE - Response from target:"
-    LOGGER.debug "INTERNET ARCHIVE - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
-    LOGGER.debug "INTERNET ARCHIVE - Body:"
-    LOGGER.debug @response_body
+    LOGGER.debug "INTERNET ARCHIVE - Response from target: #{@response_status}"
+    #LOGGER.debug "INTERNET ARCHIVE - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    #LOGGER.debug "INTERNET ARCHIVE - Body:"
+    #LOGGER.debug @response_body
     
     begin
       doc = MultiJson.load(@response_body)
@@ -90,6 +92,8 @@ class InternetArchiveService < Cedilla::Service
     author = citation.authors.first.nil? ? '' : citation.authors.first.last_name.chomp(',')
 
     target += "&#{@config['citation_uri'].sub('?', URI.escape(title)).sub('?', URI.escape(author))}"
+    
+    LOGGER.debug "INTERNET ARCHIVE - Calling #{target}"
     
     target
   end

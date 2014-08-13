@@ -29,16 +29,19 @@ class WorldcatDiscoveryService < Cedilla::Service
   
   # -------------------------------------------------------------------------
   def validate_citation(citation)
+    ret = false
     # If the citation has an ISBN, ISSN, OCLC, or LCCN identifier OR an author and title
     if citation.is_a?(Cedilla::Citation)
-      return (!citation.isbn.nil? or !citation.eisbn.nil? or 
+      ret = (!citation.isbn.nil? or !citation.eisbn.nil? or 
               !citation.issn.nil? or !citation.eissn.nil? or 
               !citation.oclc.nil? or !citation.lccn.nil? or
               (!citation.authors.empty? and (!citation.title.nil? or !citation.book_title.nil? or
                                              !citation.journal_title.nil? or !citation.article_title.nil?)))
-    else
-      return false
     end
+    
+    LOGGER.debug "WORLDCAT DISCOVERY - Checking validity of Citation (must have ISBN, ISSN, OCLC, LCCN, or Author and Title) -> #{ret}"
+    
+    ret
   end
 
   # -------------------------------------------------------------------------
@@ -92,9 +95,9 @@ class WorldcatDiscoveryService < Cedilla::Service
   # Each implementation of a CedillaService MUST override this method!
   # -------------------------------------------------------------------------
   def process_response
-    LOGGER.debug "WORLDCAT DISCOVERY - Response from target:"
-    LOGGER.debug "WORLDCAT DISCOVERY - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
-    LOGGER.debug "WORLDCAT DISCOVERY - Body: uncomment line!"
+    LOGGER.debug "WORLDCAT DISCOVERY - Response from target: #{@response_status}"
+    #LOGGER.debug "WORLDCAT DISCOVERY - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    #LOGGER.debug "WORLDCAT DISCOVERY - Body: uncomment line!"
     #LOGGER.debug @response_body
   
     @response_body

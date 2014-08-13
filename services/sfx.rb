@@ -23,6 +23,8 @@ class SfxService < Cedilla::Service
       end
     end
     
+    LOGGER.debug "SFX - Checking validity of Citation (must have an Identifier or a Title and Author) -> #{ret}"
+    
     ret
   end
   
@@ -71,9 +73,9 @@ class SfxService < Cedilla::Service
   # -------------------------------------------------------------------------
   def process_response()
     
-    LOGGER.debug "SFX - Response from target:"
-    LOGGER.debug "SFX - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
-    LOGGER.debug "SFX - Body:"
+    LOGGER.debug "SFX - Response from target: #{@response_status}"
+    #LOGGER.debug "SFX - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
+    #LOGGER.debug "SFX - Body:"
     #LOGGER.debug @response_body
     
     begin
