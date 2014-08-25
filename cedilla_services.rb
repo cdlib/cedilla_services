@@ -10,7 +10,7 @@ class CedillaServices < Sinatra::Application
     "Cedilla Delivery Aggregator Wiki</a>"
   
   config = nil
-  
+
   if File.exists?(File.dirname(__FILE__) + '/config/app.yml')
     config = YAML.load_file('./config/app.yml')
   else

@@ -22,7 +22,7 @@ class CedillaServicesTest < Minitest::Test
   # --------------------------------------------------------------------------------------------------
   def test_startup
     yaml = nil
-    if File.exists?(File.dirname(__FILE__) + '/config/app.yml')
+    if File.exists?(File.dirname(__FILE__).sub('test', 'config/app.yml'))
       yaml = YAML.load_file('./config/app.yml')
     else
       puts "Warning ./config/app.yml not found! Using ./config/app.yml.example instead."
@@ -33,7 +33,7 @@ class CedillaServicesTest < Minitest::Test
       get "/#{service}"
       
       # Only enabled services are started
-      assert_equal (defs['enabled'] ? true : false), last_response.ok?, "Was expecting an HTTP #{(defs['enabled'] ? 200 : 404)} for #{service}!"
+      assert_equal (defs['enabled'] ? true : false), last_response.ok?, "Was expecting an HTTP #{(defs['enabled'] ? 200 : 404)} for #{service} but got #{last_response.status}"
       
       if defs['enabled']
         # Question mark was replaced with service name 
