@@ -34,10 +34,10 @@ class CrossrefSearchService < Cedilla::Service
     query = citation.doi unless citation.doi.nil?
     query = citation.pmid if !citation.pmid.nil? and query.nil?
     query = citation.eissn if !citation.eissn.nil? and query.nil?
-    query = citation.issn if !citation.doi.nil? and query.nil?
+    query = citation.issn if !citation.issn.nil? and query.nil?
     
     # No identifier was available so use the title
-    query = citation.issn if !citation.issn.nil? and query.nil?
+    query = citation.article_title if !citation.article_title.nil? and query.nil?
     
     targ = "#{build_target}#{URI.escape(query)}#{@config['sort_param']}"
     
