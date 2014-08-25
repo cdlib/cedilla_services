@@ -37,7 +37,7 @@ class CedillaServicesTest < Minitest::Test
       
       if defs['enabled']
         # Question mark was replaced with service name 
-        assert last_response.body.include?(CedillaServices.to_camel_case(service)), "Was expecting the response to contain the service name, #{service}!"
+        assert last_response.body.include?(CedillaServices.to_camel_case(service)), "Was expecting the response to contain the service, #{service}!"
         
         assert Object.const_defined?("#{CedillaServices.to_camel_case(service)}Service"), "Was expecting the #{service} service to have a class definition!"
       end
