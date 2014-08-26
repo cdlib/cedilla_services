@@ -217,4 +217,23 @@ services:
       RDFS_LABEL: 'http://www.w3.org/2000/01/rdf-schema#label'
       RDFS_COMMENT: 'http://www.w3.org/2000/01/rdf-schema#comment'
       FOAF_TOPIC: 'http://xmlns.com/foaf/0.1/isPrimaryTopicOf'
+
     
+  crossref_search:
+    # ---------------------------------------------------------------------------------------------------------------------------
+    # For more info on working with the CrossRef Metadat Search API, please visit: http://search.crossref.org/help/api
+    enabled: true
+    max_attempts: 1
+
+    target: 'http://search.crossref.org/dois?q='
+
+    minimum_api_version: 1.1
+
+    http_method: 'get'
+    http_timeout: 5
+    http_error_on_non_200: true
+    http_max_redirects: 5
+
+    sort_param: '&sort=score'
+
+    cedilla_citation_target: 'http://localhost:3005/citation'
