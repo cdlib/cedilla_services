@@ -82,23 +82,23 @@ class WorldcatDiscoveryTest < Minitest::Test
       if citation.extras['valid']
         last_name = (citation.authors.first.nil? ? '' : citation.authors.first.last_name)
         title = (citation.article_title.nil? ? citation.journal_title.nil? ? citation.book_title.nil? ? citation.title.nil? ? '' : citation.title : citation.book_title : citation.journal_title : citation.article_title)
-      
+        
         if !citation.oclc.nil?
           stub_request(:get, "#{@config['target']}/data/#{citation.oclc}").
-                      with(:headers => {'Accept'=>'application/rdf+xml', 'Accept-Encoding'=>'gzip, deflate', 'Authorization'=>'Bearer', 'User-Agent'=>'WorldCat::Discovery Ruby gem / 0.1.0'}).
+                      with(:headers => {'Accept'=>'application/rdf+xml', 'Accept-Encoding'=>'gzip, deflate', 'Authorization'=>'Bearer', 'User-Agent'=>'WorldCat::Discovery Ruby gem / 0.3.0'}).
                       to_return(:status => 200, 
                                 :body => File.new("#{File.expand_path(File.dirname(__FILE__)).sub('test', 'vendor/worldcat-discovery-ruby/spec/support/responses/bib_search.rdf')}", 'r'), 
                                 :headers => {'Content-Type' => 'application/rdf+xml;charset=UTF-8'})
                                 
         elsif last_name != '' and title != ''
-          stub_request(:get, "#{@config['target']}/search?au=#{URI.escape(last_name)}&facets=inLanguage:10&q=#{URI.escape(title)}&startNum=0").
-                      with(:headers => {'Accept'=>'application/rdf+xml', 'Accept-Encoding'=>'gzip, deflate', 'Authorization'=>'Bearer', 'User-Agent'=>'WorldCat::Discovery Ruby gem / 0.1.0'}).
+          stub_request(:get, "#{@config['target']}/search?au=#{URI.escape(last_name)}&dbIds=638&facets=inLanguage:10&q=#{URI.escape(title)}&startNum=0").
+                      with(:headers => {'Accept'=>'application/rdf+xml', 'Accept-Encoding'=>'gzip, deflate', 'Authorization'=>'Bearer', 'User-Agent'=>'WorldCat::Discovery Ruby gem / 0.3.0'}).
                       to_return(:status => 200, 
                                 :body => File.new("#{File.expand_path(File.dirname(__FILE__)).sub('test', 'vendor/worldcat-discovery-ruby/spec/support/responses/bib_search.rdf')}", 'r'), 
                                 :headers => {'Content-Type' => 'application/rdf+xml;charset=UTF-8'})
         elsif title != ''
-          stub_request(:get, "#{@config['target']}/search?facets=inLanguage:10&q=#{URI.escape(title)}&startNum=0").
-                      with(:headers => {'Accept'=>'application/rdf+xml', 'Accept-Encoding'=>'gzip, deflate', 'Authorization'=>'Bearer', 'User-Agent'=>'WorldCat::Discovery Ruby gem / 0.1.0'}).
+          stub_request(:get, "#{@config['target']}/search?dbIds=638&facets=inLanguage:10&q=#{URI.escape(title)}&startNum=0").
+                      with(:headers => {'Accept'=>'application/rdf+xml', 'Accept-Encoding'=>'gzip, deflate', 'Authorization'=>'Bearer', 'User-Agent'=>'WorldCat::Discovery Ruby gem / 0.3.0'}).
                       to_return(:status => 200, 
                                 :body => File.new("#{File.expand_path(File.dirname(__FILE__)).sub('test', 'vendor/worldcat-discovery-ruby/spec/support/responses/bib_search.rdf')}", 'r'), 
                                 :headers => {'Content-Type' => 'application/rdf+xml;charset=UTF-8'})
