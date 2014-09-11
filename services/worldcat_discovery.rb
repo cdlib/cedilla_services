@@ -51,7 +51,15 @@ class WorldcatDiscoveryService < Cedilla::Service
     
     if !request.citation.oclc.nil?
       # We have a specific item id
-      bib = WorldCat::Discovery::Bib.find(request.citation.oclc)
+      begin
+        bib = WorldCat::Discovery::Bib.find(request.citation.oclc)
+      
+      rescue Exception => e
+        LOGGER.debug "Failure in Worldcat::Discovery::Bib.find(#{request.citation.oclc}) module! #{e.message}"
+        LOGGER.debug e.backtrace
+        
+        Cedilla::Error.new('fatal', "An error occurred while interacting with te Worldcat Discovery API!")
+      end
       
       ret['citations'] << build_citation(bib) unless bib.nil?
       
@@ -67,7 +75,15 @@ class WorldcatDiscoveryService < Cedilla::Service
       params[:facets] = ['author:10', 'inLanguage:10']
       params[:startNum] = 0
       
-      results = WorldCat::Discovery::Bib.search(params)
+      begin
+        results = WorldCat::Discovery::Bib.search(params)
+      
+      rescue Exception => e
+        LOGGER.debug "Failure in Worldcat::Discovery::Bib.search(#{params}) module! #{e.message}"
+        LOGGER.debug e.backtrace
+        
+        Cedilla::Error.new('fatal', "An error occurred while interacting with te Worldcat Discovery API!")
+      end
       
       results.bibs.map do |bib|
         new_citation = build_citation(bib)
@@ -98,7 +114,7 @@ class WorldcatDiscoveryService < Cedilla::Service
     LOGGER.debug "WORLDCAT DISCOVERY - Response from target: #{@response_status}"
     #LOGGER.debug "WORLDCAT DISCOVERY - Headers: #{@response_headers.collect{ |k,v| "#{k} = #{v}" }.join(', ')}"
     #LOGGER.debug "WORLDCAT DISCOVERY - Body: uncomment line!"
-    #LOGGER.debug @response_body
+    LOGGER.debug @response_body
   
     @response_body
   end
@@ -109,6 +125,8 @@ private
     citation = {}
     author = {}
     resource = {}
+    
+puts bib
     
     citation['title'] = bib.name
     citation['isbn'] = bib.isbns.last unless bib.isbns.nil?

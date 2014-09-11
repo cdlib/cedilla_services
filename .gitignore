@@ -15,17 +15,21 @@
 /log/*.log
 /log/*.pid
 /tmp
+/log
 
 Gemfile.lock
 
 *.sh
 *.log
 *.out
+*.gz
 
 .DS_Store
 
 /config/*.yml
 /config/*.yaml
+
+/vendor/**
 
 **/tmp
 **/log
