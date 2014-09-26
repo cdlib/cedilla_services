@@ -23,6 +23,7 @@ Gemfile.lock
 *.log
 *.out
 *.gz
+.ruby-version
 
 .DS_Store
 

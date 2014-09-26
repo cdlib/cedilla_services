@@ -85,18 +85,21 @@ class WorldcatDiscoveryService < Cedilla::Service
         Cedilla::Error.new('fatal', "An error occurred while interacting with te Worldcat Discovery API!")
       end
       
-      results.bibs.map do |bib|
-        new_citation = build_citation(bib)
+      if results
+        results.bibs.map do |bib|
+          new_citation = build_citation(bib)
         
-        ret['citations'].each do |citation|
-          # If the new citation matches one we've already processed just combine the values onto the existing citation
-          if request.citation == new_citation
-            request.citation.combine(new_citation)
-            new_citation = nil
+          ret['citations'].each do |citation|
+            # If the new citation matches one we've already processed just combine the values onto the existing citation
+            if request.citation == new_citation
+              request.citation.combine(new_citation)
+              new_citation = nil
+            end
           end
+        
+          ret['citations'] << new_citation unless new_citation.nil?
         end
         
-        ret['citations'] << new_citation unless new_citation.nil?
       end
     end
   
