@@ -61,15 +61,27 @@ class WorldcatDiscoveryService < Cedilla::Service
         Cedilla::Error.new('fatal', "An error occurred while interacting with te Worldcat Discovery API!")
       end
       
-      ret['citations'] << build_citation(bib) unless bib.nil?
+      ret = build_citation(bib) unless bib.nil?
       
     else
       # We don't have an item id so do a search
-      params = {:q => (request.citation.book_title.nil? ? 
+      params = {:q => (request.citation.isbn.nil? ?
+                       request.citation.eisbn.nil? ?
+                       request.citation.issn.nil? ?
+                       request.citation.eissn.nil? ?
+                       request.citation.lccn.nil? ?
+                       request.citation.doi.nil? ? 
+                       request.citation.book_title.nil? ? 
                        request.citation.article_title.nil? ? 
                        request.citation.journal_title.nil? ? request.citation.title : request.citation.journal_title : 
                        request.citation.article_title : 
-                       request.citation.book_title)}
+                       request.citation.book_title : 
+                       request.citation.doi :
+                       request.citation.lccn :
+                       request.citation.eissn :
+                       request.citation.issn :
+                       request.citation.eisbn :
+                       request.citation.isbn)}
                        
       params[:au] = request.citation.authors.first.last_name unless request.citation.authors.size <= 0
       params[:facets] = ['author:10', 'inLanguage:10']
@@ -129,31 +141,46 @@ private
     author = {}
     resource = {}
     
-puts bib
-    
     citation['title'] = bib.name
     citation['isbn'] = bib.isbns.last unless bib.isbns.nil?
-    citation['publisher'] = bib.publisher.first.to_s unless bib.publisher.first.nil?
+    citation['publisher'] = bib.publisher.name unless bib.publisher.nil?
     citation['publication_date'] = bib.date_published unless bib.date_published.nil?
-    citation['publication_place'] = bib.places_of_publication.select{ |place| !(place.subject.to_s =~ /_:[A-Z][0-9]+/) } unless bib.places_of_publication.nil?
+    citation['publication_place'] = bib.places_of_publication.first.name unless bib.places_of_publication.nil? #{ |place| !(place.subject.to_s =~ /_:[A-Z][0-9]+/) } unless bib.places_of_publication.nil?
     citation['pages'] = bib.num_pages unless bib.num_pages.nil?
     citation['edition'] = bib.book_edition unless bib.book_edition.nil?
-    citation['subjects'] = bib.subjects.collect{ |sub| "#{sub.id}" } unless bib.subjects.nil?
-    citation['contributors'] = bib.contributors.collect{ |con| "#{con.name} (#{con.id.to_s})" } unless bib.contributors.nil?
+    citation['subjects'] = bib.subjects.collect{ |sub| "#{sub.name}" } unless bib.subjects.nil?
+#    citation['contributors'] = bib.contributors.collect{ |con| "#{con.name} (#{con.id.to_s})" } unless bib.contributors.nil?
     
-    author['authority'] = bib.author.to_s unless bib.author.nil?
-    author['full_name'] = bib.author.name unless bib.author.nil?
+#    author['authority'] = bib.author.to_s unless bib.author.nil?
+#    author['full_name'] = bib.author.name unless bib.author.nil?
     
-    resource['target'] = bib.id.to_s
-    resource['format'] = bib.type.to_s 
-    resource['description'] = bib.descriptions.first unless bib.descriptions.first.nil?
-    resource['language'] = bib.language unless bib.language.nil?
-    resource['oclc_lod'] = bib.work_uri unless bib.work_uri.nil?
-    resource['reviews'] = bib.reviews.collect{ |rev| "#{rev.id}" } unless bib.reviews.nil?
-    resource['rating'] = bib.display_position || 1
+    citation['target'] = bib.id.to_s
+    citation['format'] = bib.type.to_s 
+    citation['description'] = bib.descriptions.first unless bib.descriptions.first.nil?
+    citation['language'] = bib.language unless bib.language.nil?
+    citation['oclc_lod'] = bib.work_uri unless bib.work_uri.nil?
+    citation['reviews'] = bib.reviews.collect{ |rev| "#{rev.id}" } unless bib.reviews.nil?
+    citation['rating'] = bib.display_position || 1
     
     ret = Cedilla::Citation.new(citation)
-    ret.authors << Cedilla::Author.new(author) if author.size > 0
+#    ret.authors << Cedilla::Author.new(author) if author.size > 0
+
+    unless bib.author.nil?
+      ret.authors << Cedilla::Author.new({:full_name => [bib.author.given_name, bib.author.family_name].compact.join(" "),
+                                          :first_name => bib.author.given_name,
+                                          :last_name => bib.author.family_name,
+                                          :dates => "#{bib.author.birth_date} - #{bib.author.death_date}",
+                                          :type => bib.author.type})
+    end
+
+    bib.contributors.each do |con|
+      ret.authors << Cedilla::Author.new({:full_name => con.name,
+                                          :first_name => con.given_name,
+                                          :last_name => con.family_name,
+                                          :dates => "#{con.birth_date} - #{con.death_date}",
+                                          :type => con.type.to_s})
+    end
+
     ret.resources << Cedilla::Resource.new(resource) if resource.size > 0
 
 =begin    
