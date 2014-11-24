@@ -65,11 +65,23 @@ class WorldcatDiscoveryService < Cedilla::Service
       
     else
       # We don't have an item id so do a search
-      params = {:q => (request.citation.book_title.nil? ? 
+      params = {:q => (request.citation.isbn.nil? ?
+                       request.citation.eisbn.nil? ?
+                       request.citation.issn.nil? ?
+                       request.citation.eissn.nil? ?
+                       request.citation.lccn.nil? ?
+                       request.citation.doi.nil? ? 
+                       request.citation.book_title.nil? ? 
                        request.citation.article_title.nil? ? 
                        request.citation.journal_title.nil? ? request.citation.title : request.citation.journal_title : 
                        request.citation.article_title : 
-                       request.citation.book_title)}
+                       request.citation.book_title : 
+                       request.citation.doi :
+                       request.citation.lccn :
+                       request.citation.eissn :
+                       request.citation.issn :
+                       request.citation.eisbn :
+                       request.citation.isbn)}
                        
       params[:au] = request.citation.authors.first.last_name unless request.citation.authors.size <= 0
       params[:facets] = ['author:10', 'inLanguage:10']
