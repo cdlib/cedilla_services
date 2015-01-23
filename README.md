@@ -33,7 +33,7 @@ The individual services are implementations of the https://github.com/cdlib/cedi
 
 > cd vendor/oclc-auth-ruby
 > gem build oclc-auth.gemspec
-> gem install oclc-auth-ruby
+> gem install oclc-auth
 
 > cd ../worldcat-discovery-ruby
 > gem build worldcat-discovery.gemspec
