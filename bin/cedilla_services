@@ -43,6 +43,12 @@ function cedilla_services_stop {
   echo "Cedilla service stopped"
 }
 
+function cedilla_services_deploy {
+  echo "cedilla_services_deploy is just a restart for now"
+  cedilla_services_stop
+  cedilla_services_start
+}
+
 function cedilla_services_test {
   cd $HOME
   rake test 
