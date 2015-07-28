@@ -18,7 +18,7 @@ function cedilla_services_start {
     return 1
   fi
   cd ${HOME}
-  thin -R config.ru start -P $PID -p $CEDILLA_SERVICES_PORT -d
+  thin -R config.ru start -P $PID -p $CEDILLA_SERVICES_PORT -d --threaded 
   if [ $? -ne 0 ]; then
     echo "Cedilla start failed."
     return 1
