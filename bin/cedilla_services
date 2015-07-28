@@ -1,0 +1,57 @@
+#!/bin/bash
+# cedilla_services admin script
+# jff 03/13/2015
+
+OP=$1
+if [ ! -d "$CDLA_HOME" ]; then
+  echo "CDLA_HOME environment variable not set or not a directory."
+  exit 1
+fi
+source ${CDLA_HOME}/conf/cdla_env
+HOME="${CDLA_HOME}/apps/cedilla_services"
+PID="${CDLA_HOME}/apps/cedilla_services/cedilla_services.pid"
+
+function cedilla_services_start {
+  echo "starting Cedilla services"
+  if [ -f "${PID}" ]; then
+    echo "Cedilla_services appears to already be running, based on the presence of ${PID}."
+    return 1
+  fi
+  cd ${HOME}
+  thin -R config.ru start -P $PID -p $CEDILLA_SERVICES_PORT -d --threaded 
+  if [ $? -ne 0 ]; then
+    echo "Cedilla start failed."
+    return 1
+  fi
+  echo "Cedilla services started"
+}
+
+function cedilla_services_stop {
+  echo "Stopping Cedilla services"
+  if [ ! -f "${PID}" ]; then
+    echo "pid file not found; assuming process is already stopped"
+    exit 0
+  fi
+  read PIDN <${PID}
+  kill -2 ${PIDN}
+  if [ $(ps -p ${PIDN} | wc -l) -eq 2 ]; then
+    echo "Process ${PIDN} was still up, killed with signal 9"
+    kill -9 ${PIDN}
+  fi
+    
+  rm ${PID}
+  echo "Cedilla service stopped"
+}
+
+function cedilla_services_deploy {
+  echo "cedilla_services_deploy is just a restart for now"
+  cedilla_services_stop
+  cedilla_services_start
+}
+
+function cedilla_services_test {
+  cd $HOME
+  rake test 
+}
+
+cedilla_services_${OP}
