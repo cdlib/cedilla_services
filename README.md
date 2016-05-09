@@ -7,7 +7,8 @@
 This project contains a collection of services that can be used to feed the Cedilla delivery aggregation system: https://github.com/cdlib/cedilla.
 
 The project consists of a single Sinatra webserver (http://www.sinatrarb.com/), that exposes an HTTP endpoint for each of the services registered in the /config/app.yml configuration file.
-
+ TESTING
+ 
 The individual services are implementations of the https://github.com/cdlib/cedilla_service_commons ruby gem which provides a unified way to communicate with the cedilla system. Please see the Gem's documentation if you would like to add your own services to this project.
 
 #### Dependencies
